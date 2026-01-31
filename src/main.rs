@@ -1,15 +1,27 @@
-mod lex;
 mod parser;
 mod program;
+mod lexer;
 
 use std::fs;
-use crate::lex::{Lexer, Token};
+use crate::lexer::{TokenStream};
 
 fn main() {
     let input = fs::read_to_string("./.example/index.mp")
         .expect("Should have been able to read the file");
 
-    let lexer = Lexer::new(input);
+    let mut stream = TokenStream::new(input)
+        .unwrap();
 
-    lexer.for_each(|node: Token| println!("{}", node.to_string()));
+    let mut i: usize = 0;
+
+    loop {
+        let candidate = stream.get(i);
+
+        if candidate.is_none() {
+            break;
+        }
+        i += 1;
+
+        println!("{}", candidate.unwrap().to_string())
+    }
 }

@@ -1,5 +1,5 @@
 #[derive(Copy, PartialEq, Eq, Clone, Debug)]
-enum TokenName {
+pub enum TokenName {
     Whitespace,
     Word,
     Number,
@@ -9,51 +9,61 @@ enum TokenName {
     String,
 }
 
-pub(crate) struct Lexer {
-    chars: Vec<char>,
-    pos: usize,
-    specs: Specs,
+pub struct TokenStream {
+    tokens: Vec<Token>,
 }
 
-impl Lexer {
-    pub(crate) fn new(input: String) -> Lexer {
-        Lexer{chars: input.chars().collect(), pos: 0, specs: Specs::new()}
-    }
-}
-impl Iterator for Lexer {
-    type Item = Token;
-
-    fn next(&mut self) -> Option<Self::Item> {
+impl TokenStream {
+    pub fn new(input: String) -> Result<TokenStream, String> {
+        let chars: Vec<char> = input.chars().collect();
         let mut buffer = String::new();
+        let mut last_char_idx: usize = 0;
+        let mut specs: Specs = Specs::new();
+        let mut tokens: Vec<Token> = Vec::new();
 
         loop {
-            let char = *self.chars.get(self.pos).unwrap_or(&'\0');
+            let char = *chars.get(last_char_idx).unwrap_or(&'\0');
 
             if buffer.len() == 0 && char == '\0' {
-                return None;
+                break;
             }
 
-            let candidate = self.specs.decide(char, buffer.clone());
+            let candidate = specs.decide(char, buffer.clone());
 
             if candidate.is_some() {
-                self.specs.reset();
+                specs.reset();
                 let spec = candidate.unwrap();
 
-                if spec.token_name == TokenName::Whitespace {
-                    buffer.clear();
-                    continue;
+                let token = Token::new(spec.token_name, buffer.clone(), last_char_idx);
+
+                buffer.clear();
+
+                if token.name != TokenName::Whitespace {
+                    tokens.push(token);
                 }
 
-                return Some(Token::new(spec.token_name, buffer.clone(), self.pos));
+                continue;
             }
 
-            self.pos += 1;
+            last_char_idx += 1;
             buffer.push(char);
         }
+
+        Ok(TokenStream { tokens })
+    }
+    pub fn get(&mut self, i: usize) -> Option<Token> {
+        let candidate = self.tokens.get(i);
+
+        if candidate.is_some() {
+            return Some(candidate.unwrap().clone());
+        }
+
+        None
     }
 }
 
-pub(crate) struct Token {
+#[derive(Clone)]
+pub struct Token {
     name: TokenName,
     at: usize,
     value: String,
