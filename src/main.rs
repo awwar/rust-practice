@@ -1,6 +1,6 @@
 mod parser;
-mod program;
 mod lexer;
+mod program;
 
 use std::fs;
 use crate::lexer::{TokenStream};

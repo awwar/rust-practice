@@ -64,7 +64,7 @@ impl TokenStream {
 
 #[derive(Clone)]
 pub struct Token {
-    name: TokenName,
+    pub(crate) name: TokenName,
     at: usize,
     value: String,
 }
@@ -89,7 +89,7 @@ impl Specs {
         Specs(Vec::from([
             Spec::new(TokenName::Whitespace, |c, _| c.is_whitespace() || c.is_control()),
             // 111 1 1.1 .1
-            Spec::new(TokenName::Number, |c, b| c.is_numeric() || (c == '.' && !b.contains('.'))),
+            Spec::new(TokenName::Number, |c, b| c.is_numeric() || (c == '.' && !b.contains('.')) || (c == '-' && b.len() == 0)),
             // aaa 1aa a1a a_1a
             Spec::new(TokenName::Word, |c, _| { c.is_alphanumeric() || "#$_".contains(c) }),
             // + - * / =

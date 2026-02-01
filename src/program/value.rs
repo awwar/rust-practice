@@ -1,9 +1,12 @@
-const INTEGER_TYPE: &str = "integer";
-const FLOAT_TYPE: &str = "float";
-const BOOLEAN_TYPE: &str = "boolean";
-const STRING_TYPE: &str = "string";
+#[derive(PartialEq)]
+pub enum ValueType {
+    Integer,
+    Float,
+    Boolean,
+    String,
+}
 
-struct Value<T>(T);
+pub struct Value<T>(pub T);
 
 // may be  union Val { f: f64, i: i64, b: bool } or enum Val { Int(u64), Float(f64), Boolean(bool), String(String) }
 
@@ -12,9 +15,9 @@ type FloatValue = Value<f64>;
 type BoolValue = Value<bool>;
 type StringValue = Value<String>;
 
-trait ValueConverter {
-    fn repr(&self) -> String;
-    fn type_name(&self) -> &str;
+pub trait ValueConverter {
+    fn raw(&self) -> String;
+    fn type_name(&self) -> ValueType;
     fn to_integer(self) -> Result<IntegerValue, String>;
     fn to_float(self) -> Result<FloatValue, String>;
     fn to_bool(self) -> Result<BoolValue, String>;
@@ -24,15 +27,15 @@ trait ValueConverter {
     fn multiply(self, r: Self) -> Result<Self, String> where Self: Sized;
     fn divide(self, r: Self) -> Result<Self, String> where Self: Sized;
     fn power(self, r: Self) -> Result<Self, String> where Self: Sized;
-    fn more(self, r: Self) -> Result<BoolValue, String>;
-    fn less(self, r: Self) -> Result<BoolValue, String>;
-    fn eq(self, r: Self) -> Result<BoolValue, String>;
+    fn more(self, r: Self) -> Result<BoolValue, String> where Self: Sized;
+    fn less(self, r: Self) -> Result<BoolValue, String> where Self: Sized;
+    fn eq(self, r: Self) -> Result<BoolValue, String> where Self: Sized;
 }
 
 #[rustfmt::skip]
 impl ValueConverter for IntegerValue {
-    fn repr(&self) -> String { self.0.to_string() }
-    fn type_name(&self) -> &str { INTEGER_TYPE }
+    fn raw(&self) -> String { self.0.to_string() }
+    fn type_name(&self) -> ValueType { ValueType::Integer }
     fn to_integer(self) -> Result<IntegerValue, String> { Ok(self) }
     fn to_float(self) -> Result<FloatValue, String> { Ok(Value(self.0 as f64)) }
     fn to_bool(self) -> Result<BoolValue, String> { Ok(Value(self.0 != 0)) }
@@ -49,8 +52,8 @@ impl ValueConverter for IntegerValue {
 
 #[rustfmt::skip]
 impl ValueConverter for FloatValue {
-    fn repr(&self) -> String { self.0.to_string() }
-    fn type_name(&self) -> &str { FLOAT_TYPE }
+    fn raw(&self) -> String { self.0.to_string() }
+    fn type_name(&self) -> ValueType { ValueType::Float }
     fn to_integer(self) -> Result<IntegerValue, String> { Ok(Value(self.0 as i64)) }
     fn to_float(self) -> Result<FloatValue, String> { Ok(Value(self.0)) }
     fn to_bool(self) -> Result<BoolValue, String> { Ok(Value(self.0 != 0.0)) }
@@ -67,8 +70,8 @@ impl ValueConverter for FloatValue {
 
 #[rustfmt::skip]
 impl ValueConverter for BoolValue {
-    fn repr(&self) -> String { self.0.to_string() }
-    fn type_name(&self) -> &str { BOOLEAN_TYPE }
+    fn raw(&self) -> String { self.0.to_string() }
+    fn type_name(&self) -> ValueType { ValueType::Boolean }
     fn to_integer(self) -> Result<IntegerValue, String> { Ok(Value(self.0 as i64)) }
     fn to_float(self) -> Result<FloatValue, String> { Ok(Value(self.0 as i64 as f64)) }
     fn to_bool(self) -> Result<BoolValue, String> { Ok(self) }
@@ -85,8 +88,8 @@ impl ValueConverter for BoolValue {
 
 #[rustfmt::skip]
 impl ValueConverter for StringValue {
-    fn repr(&self) -> String { self.0.to_string() }
-    fn type_name(&self) -> &str { STRING_TYPE }
+    fn raw(&self) -> String { self.0.to_string() }
+    fn type_name(&self) -> ValueType { ValueType::String }
     fn to_integer(self) -> Result<IntegerValue, String> {
         self.0.parse::<i64>().map(|t| Value(t)).map_err(|e| e.to_string())
     }

@@ -2,7 +2,7 @@
 call #LOTTERY () $LOTTERY_RESULT
 
 #LOTTERY() void
-var (32) $SOME_VALUE
+var (-32) $SOME_VALUE
 
 call #FLIP_COIN (0.5) $FLIP_COIN_RESULT
 
