@@ -1,7 +1,7 @@
 use crate::program::{Value, ValueConverter, ValueType};
 use std::cmp::PartialEq;
 
-#[derive(PartialEq)]
+#[derive(PartialEq,Clone)]
 enum NodeType {
     Operation,
     Constant,
@@ -12,41 +12,42 @@ enum NodeType {
     Program,
 }
 
-pub struct Node<'a> {
+#[derive(Clone)]
+pub struct Node {
     node_type: NodeType,
-    value: &'a dyn ValueConverter,
-    params: Vec<Node<'a>>,
+    value: Box<dyn ValueConverter>,
+    params: Vec<Node>,
     priority: usize,
-    token_position: i32,
+    token_position: usize,
 }
 
 const OPERATION_PRIORITY: [&'static str; 9] = ["+", "-", "*", "/", ">", "<", "=", "^", "."];
 
-impl Node<'_> {
-    fn new_program(params: Vec<Self>) -> Self {
+impl Node {
+    pub(crate) fn new_program(params: Vec<Self>) -> Self {
         Self {
             node_type: NodeType::Program,
-            value: &Value::<String>("root".to_string()),
+            value: Box::new(Value::<String>("root".to_string())),
             params,
             priority: 4,
             token_position: 0,
         }
     }
 
-    fn new_constant(value: String, token_position: i32) -> Self {
+    pub(crate) fn new_constant(value: String, token_position: usize) -> Self {
         Self {
             node_type: NodeType::Constant,
-            value: &Value::<String>(value),
+            value: Box::new(Value::<String>(value)),
             params: vec![],
             priority: 4,
             token_position,
         }
     }
 
-    fn new_operation(operation: String, params: Vec<Self>, token_position: i32) -> Self {
+    pub(crate) fn new_operation(operation: String, params: Vec<Self>, token_position: usize) -> Self {
         let mut node = Node {
             node_type: NodeType::Operation,
-            value: &Value::<String>(operation.to_string()),
+            value: Box::new(Value::<String>(operation.to_string())),
             params,
             priority: OPERATION_PRIORITY.iter().position(|n| n.eq(&operation)).unwrap_or(0) + 1,
             token_position,
@@ -59,13 +60,13 @@ impl Node<'_> {
         node
     }
 
-    fn new_number(value: String, token_position: i32) -> Self {
-        let value_obj: &dyn ValueConverter;
+    fn new_number(value: String, token_position: usize) -> Self {
+        let value_obj: Box<dyn ValueConverter>;
 
         if value.contains(".") {
-            value_obj = &Value::<f64>(value.parse::<f64>().unwrap());
+            value_obj = Box::new(Value::<f64>(value.parse::<f64>().unwrap()));
         } else {
-            value_obj = &Value::<i64>(value.parse::<i64>().unwrap());
+            value_obj = Box::new(Value::<i64>(value.parse::<i64>().unwrap()));
         }
 
         Self {
@@ -77,62 +78,63 @@ impl Node<'_> {
         }
     }
 
-    fn new_string(value: String, token_position: i32) -> Self {
+    fn new_string(value: String, token_position: usize) -> Self {
         Self {
             node_type: NodeType::Constant,
-            value: &Value::<String>(value),
+            value: Box::new(Value::<String>(value)),
             params: vec![],
             priority: 4,
             token_position,
         }
     }
 
-    fn new_flow_declaration(value: String, params: Vec<Self>, token_position: i32) -> Self {
+    pub(crate) fn new_flow_declaration(value: String, params: Vec<Self>, token_position: usize) -> Self {
         Self {
             node_type: NodeType::FlowDeclaration,
-            value: &Value::<String>(value),
+            value: Box::new(Value::<String>(value)),
             params,
             priority: 4,
             token_position,
         }
     }
 
-    fn new_flow_branches_declaration(value: String, params: Vec<Self>, token_position: i32) -> Self {
+    fn new_flow_branches_declaration(value: String, params: Vec<Self>, token_position: usize) -> Self {
         Self {
             node_type: NodeType::FlowBranchesDeclaration,
-            value: &Value::<String>(value),
+            value: Box::new(Value::<String>(value)),
             params,
             priority: 4,
             token_position,
         }
     }
 
-    fn new_flow_link(value: String, token_position: i32) -> Self {
+    pub(crate) fn new_flow_link(value: String, token_position: usize) -> Self {
         Self {
             node_type: NodeType::FlowLink,
-            value: &Value::<String>(value),
+            value: Box::new(Value::<String>(value)),
             params: vec![],
             priority: 4,
             token_position,
         }
     }
 
-    fn new_variable(value: String, token_position: i32) -> Self {
+    pub(crate) fn new_variable(value: String, token_position: usize) -> Self {
         Self {
             node_type: NodeType::Variable,
-            value: &Value::<String>(value),
+            value: Box::new(Value::<String>(value)),
             params: vec![],
             priority: 4,
             token_position,
         }
     }
-    fn to_string(self, indent: i32) -> String {
+    fn format(&self, indent: i32) -> String {
         let string_indent = "    ".repeat(indent as usize);
 
         let mut branches = "".to_string();
 
         for n in self.params.iter() {
-            branches += format!("{}└── {}", string_indent, n.to_string(indent + 1)).as_str();
+            let substr: String = n.clone().format(indent + 1);
+            branches += format!("{}└── {}", string_indent, substr).as_str();
         }
 
         format!("{}\n{}", self.value.raw(), branches)

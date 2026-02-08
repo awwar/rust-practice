@@ -9,6 +9,7 @@ pub enum TokenName {
     String,
 }
 
+#[derive(Clone)]
 pub struct TokenStream {
     tokens: Vec<Token>,
 }
@@ -60,13 +61,37 @@ impl TokenStream {
 
         None
     }
+    pub fn search_idx_of_closed_bracer(&mut self, mut current_position: usize) -> Option<usize> {
+        let mut counts = 0;
+
+        loop {
+            let candidate = match self.tokens.get(current_position) {
+                Some(token) => token,
+                None => break,
+            };
+
+            match candidate.value.as_str() {
+                "(" => counts+=1,
+                ")" => counts-=1,
+                _ => {}
+            }
+
+            if current_position == 0 {
+                return Some(current_position);
+            }
+
+            current_position+=1
+        }
+
+        None
+    }
 }
 
 #[derive(Clone)]
 pub struct Token {
     pub(crate) name: TokenName,
-    at: usize,
-    value: String,
+    pub at: usize,
+    pub value: String,
 }
 
 impl Token {
@@ -79,6 +104,9 @@ impl Token {
     }
     pub fn to_string(&self) -> String {
         format!("{} {} {}", self.at, format!("{:?}", self.name), self.value)
+    }
+    pub fn starts_with(&self, s: &str) -> bool {
+        self.value.starts_with(s)
     }
 }
 

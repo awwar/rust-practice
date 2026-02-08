@@ -1,4 +1,4 @@
-#MAIN
+#MAIN() void
 call #LOTTERY () $LOTTERY_RESULT
 
 #LOTTERY() void
@@ -12,10 +12,10 @@ print ("Try Next?")
 
 return (void(0))
 
-#MORE
+#MORE() void
 print ("you're WIN!")
 
-#LESS
+#LESS() bool
 var (sum("you're lose ", $SOME_VALUE, " points!")) $OUT_RESULT
 
 print ($OUT_RESULT)

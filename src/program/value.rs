@@ -6,6 +6,7 @@ pub enum ValueType {
     String,
 }
 
+#[derive(Clone)]
 pub struct Value<T>(pub T);
 
 // may be  union Val { f: f64, i: i64, b: bool } or enum Val { Int(u64), Float(f64), Boolean(bool), String(String) }
@@ -18,10 +19,10 @@ type StringValue = Value<String>;
 pub trait ValueConverter {
     fn raw(&self) -> String;
     fn type_name(&self) -> ValueType;
-    fn to_integer(self) -> Result<IntegerValue, String>;
-    fn to_float(self) -> Result<FloatValue, String>;
-    fn to_bool(self) -> Result<BoolValue, String>;
-    fn to_string(self) -> Result<StringValue, String>;
+    fn to_integer(&self) -> Result<IntegerValue, String>;
+    fn to_float(&self) -> Result<FloatValue, String>;
+    fn to_bool(&self) -> Result<BoolValue, String>;
+    fn to_string(&self) -> Result<StringValue, String>;
     fn add(self, r: Self) -> Result<Self, String> where Self: Sized;
     fn subtract(self, r: Self) -> Result<Self, String> where Self: Sized;
     fn multiply(self, r: Self) -> Result<Self, String> where Self: Sized;
@@ -30,16 +31,23 @@ pub trait ValueConverter {
     fn more(self, r: Self) -> Result<BoolValue, String> where Self: Sized;
     fn less(self, r: Self) -> Result<BoolValue, String> where Self: Sized;
     fn eq(self, r: Self) -> Result<BoolValue, String> where Self: Sized;
+    fn clone_dyn(&self) -> Box<dyn ValueConverter>;
+}
+
+impl Clone for Box<dyn ValueConverter> {
+    fn clone(self: &Box<dyn ValueConverter>) -> Box<dyn ValueConverter> {
+        self.clone_dyn()
+    }
 }
 
 #[rustfmt::skip]
 impl ValueConverter for IntegerValue {
     fn raw(&self) -> String { self.0.to_string() }
     fn type_name(&self) -> ValueType { ValueType::Integer }
-    fn to_integer(self) -> Result<IntegerValue, String> { Ok(self) }
-    fn to_float(self) -> Result<FloatValue, String> { Ok(Value(self.0 as f64)) }
-    fn to_bool(self) -> Result<BoolValue, String> { Ok(Value(self.0 != 0)) }
-    fn to_string(self) -> Result<StringValue, String> { Ok(Value(self.0.to_string())) }
+    fn to_integer(&self) -> Result<IntegerValue, String> { Ok(self.clone()) }
+    fn to_float(&self) -> Result<FloatValue, String> { Ok(Value(self.0 as f64)) }
+    fn to_bool(&self) -> Result<BoolValue, String> { Ok(Value(self.0 != 0)) }
+    fn to_string(&self) -> Result<StringValue, String> { Ok(Value(self.0.to_string())) }
     fn add(self, r: Self) -> Result<Self, String> { Ok(Value(self.0 + r.0)) }
     fn subtract(self, r: Self) -> Result<Self, String> { Ok(Value(self.0 - r.0)) }
     fn multiply(self, r: Self) -> Result<Self, String> { Ok(Value(self.0 * r.0)) }
@@ -48,16 +56,19 @@ impl ValueConverter for IntegerValue {
     fn more(self, r: Self) -> Result<BoolValue, String> { Ok(Value(self.0 > r.0)) }
     fn less(self, r: Self) -> Result<BoolValue, String> { Ok(Value(self.0 < r.0)) }
     fn eq(self, r: Self) -> Result<BoolValue, String> {Ok(Value(self.0 == r.0))}
+    fn clone_dyn(&self) -> Box<dyn ValueConverter> {
+        Box::new(self.clone())
+    }
 }
 
 #[rustfmt::skip]
 impl ValueConverter for FloatValue {
     fn raw(&self) -> String { self.0.to_string() }
     fn type_name(&self) -> ValueType { ValueType::Float }
-    fn to_integer(self) -> Result<IntegerValue, String> { Ok(Value(self.0 as i64)) }
-    fn to_float(self) -> Result<FloatValue, String> { Ok(Value(self.0)) }
-    fn to_bool(self) -> Result<BoolValue, String> { Ok(Value(self.0 != 0.0)) }
-    fn to_string(self) -> Result<StringValue, String> { Ok(Value(self.0.to_string())) }
+    fn to_integer(&self) -> Result<IntegerValue, String> { Ok(Value(self.0 as i64)) }
+    fn to_float(&self) -> Result<FloatValue, String> { Ok(Value(self.0)) }
+    fn to_bool(&self) -> Result<BoolValue, String> { Ok(Value(self.0 != 0.0)) }
+    fn to_string(&self) -> Result<StringValue, String> { Ok(Value(self.0.to_string())) }
     fn add(self, r: Self) -> Result<Self, String> { Ok(Value(self.0 + r.0)) }
     fn subtract(self, r: Self) -> Result<Self, String> { Ok(Value(self.0 - r.0)) }
     fn multiply(self, r: Self) -> Result<Self, String> { Ok(Value(self.0 * r.0)) }
@@ -66,16 +77,19 @@ impl ValueConverter for FloatValue {
     fn more(self, r: Self) -> Result<BoolValue, String> { Ok(Value(self.0 > r.0)) }
     fn less(self, r: Self) -> Result<BoolValue, String> { Ok(Value(self.0 < r.0)) }
     fn eq(self, r: Self) -> Result<BoolValue, String> {Ok(Value(self.0 == r.0))}
+    fn clone_dyn(&self) -> Box<dyn ValueConverter> {
+        Box::new(self.clone())
+    }
 }
 
 #[rustfmt::skip]
 impl ValueConverter for BoolValue {
     fn raw(&self) -> String { self.0.to_string() }
     fn type_name(&self) -> ValueType { ValueType::Boolean }
-    fn to_integer(self) -> Result<IntegerValue, String> { Ok(Value(self.0 as i64)) }
-    fn to_float(self) -> Result<FloatValue, String> { Ok(Value(self.0 as i64 as f64)) }
-    fn to_bool(self) -> Result<BoolValue, String> { Ok(self) }
-    fn to_string(self) -> Result<StringValue, String> { Ok(Value(self.0.to_string())) }
+    fn to_integer(&self) -> Result<IntegerValue, String> { Ok(Value(self.0 as i64)) }
+    fn to_float(&self) -> Result<FloatValue, String> { Ok(Value(self.0 as i64 as f64)) }
+    fn to_bool(&self) -> Result<BoolValue, String> { Ok(self.clone()) }
+    fn to_string(&self) -> Result<StringValue, String> { Ok(Value(self.0.to_string())) }
     fn add(self, r: Self) -> Result<Self, String> { Ok(Value(self.0 || r.0)) }
     fn subtract(self, _: Self) -> Result<Self, String> { Err("unable to subtract bool from bool".to_owned()) }
     fn multiply(self, r: Self) -> Result<Self, String> { Ok(Value(self.0 && r.0)) }
@@ -84,20 +98,23 @@ impl ValueConverter for BoolValue {
     fn more(self, r: Self) -> Result<BoolValue, String> { Ok(Value(self.0 > r.0)) }
     fn less(self, r: Self) -> Result<BoolValue, String> { Ok(Value(self.0 < r.0)) }
     fn eq(self, r: Self) -> Result<BoolValue, String> {Ok(Value(self.0 == r.0))}
+    fn clone_dyn(&self) -> Box<dyn ValueConverter> {
+        Box::new(self.clone())
+    }
 }
 
 #[rustfmt::skip]
 impl ValueConverter for StringValue {
     fn raw(&self) -> String { self.0.to_string() }
     fn type_name(&self) -> ValueType { ValueType::String }
-    fn to_integer(self) -> Result<IntegerValue, String> {
+    fn to_integer(&self) -> Result<IntegerValue, String> {
         self.0.parse::<i64>().map(|t| Value(t)).map_err(|e| e.to_string())
     }
-    fn to_float(self) -> Result<FloatValue, String> {
+    fn to_float(&self) -> Result<FloatValue, String> {
         self.0.parse::<f64>().map(|t| Value(t)).map_err(|e| e.to_string())
     }
-    fn to_bool(self) -> Result<BoolValue, String> { Ok(Value(self.0.len() > 0)) }
-    fn to_string(self) -> Result<StringValue, String> { Ok(self) }
+    fn to_bool(&self) -> Result<BoolValue, String> { Ok(Value(self.0.len() > 0)) }
+    fn to_string(&self) -> Result<StringValue, String> { Ok(self.clone()) }
     fn add(self, r: Self) -> Result<Self, String> { Ok(Value(self.0 + &*r.0)) }
     fn subtract(self, _: Self) -> Result<Self, String> { Err("unable to subtract string from string".to_owned()) }
     fn multiply(self, _: Self) -> Result<Self, String> { Err("unable to multiply string to string".to_owned()) }
@@ -106,6 +123,9 @@ impl ValueConverter for StringValue {
     fn more(self, r: Self) -> Result<BoolValue, String> { Ok(Value(self.0 > r.0)) }
     fn less(self, r: Self) -> Result<BoolValue, String> { Ok(Value(self.0 < r.0)) }
     fn eq(self, r: Self) -> Result<BoolValue, String> {Ok(Value(self.0 == r.0))}
+    fn clone_dyn(&self) -> Box<dyn ValueConverter> {
+        Box::new(self.clone())
+    }
 }
 
 #[cfg(test)]
