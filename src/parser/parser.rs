@@ -1,5 +1,6 @@
-use crate::lexer::{TokenStream, Token, TokenName};
+use crate::lexer::{TokenName, TokenStream};
 use crate::parser::node::{Node};
+use std::ptr::addr_of;
 
 pub struct Parser {
     first_position: usize,
@@ -7,8 +8,6 @@ pub struct Parser {
     current_position: usize,
     stream: TokenStream,
 }
-
-pub type ProcedureParser = dyn Fn(&Token, &Parser) -> Result<Node, String>;
 
 impl Parser {
     pub fn new(stream: TokenStream, first_position: usize, last_position: usize) -> Self {
@@ -51,23 +50,23 @@ impl Parser {
         };
 
         if token.name != TokenName::Word || !token.starts_with("#") {
-            return Err(self.error(self.current_position, "flow declaration must start with # and has argument and return value"))
+            return Err(self.error(self.current_position, "flow declaration must start with # and has argument and return value"));
         }
 
         let mut list = Vec::<Node>::new();
 
-        let next_token  = match self.stream.get(self.current_position+1) {
-            None => return Err(format!("unable to find token at {:?}", self.current_position+1)),
+        let next_token = match self.stream.get(self.current_position + 1) {
+            None => return Err(format!("unable to find token at {:?}", self.current_position + 1)),
             Some(token) => token
         };
 
         if next_token.name != TokenName::Bracket {
-            return Err(self.error(next_token.at, "word token uses only in function context"))
+            return Err(self.error(next_token.at, "word token uses only in function context"));
         }
 
         let args_candidates = self.subparse_list_in_bracers(None);
         if args_candidates.is_err() {
-            return Err(args_candidates.err().unwrap())
+            return Err(args_candidates.err().unwrap());
         }
 
         list.extend(args_candidates.unwrap());
@@ -86,13 +85,13 @@ impl Parser {
         let sub_node_candidates = self.subparse_list_in_bracers(Some(1));
 
         if sub_node_candidates.is_err() {
-            return Err(sub_node_candidates.err().unwrap())
+            return Err(sub_node_candidates.err().unwrap());
         }
 
         let sub_nodes = sub_node_candidates.unwrap();
 
         if sub_nodes.len() != 1 {
-            return Err(self.error(self.current_position, "expected 1 sub expression"))
+            return Err(self.error(self.current_position, "expected 1 sub expression"));
         }
 
         Ok(sub_nodes.first().unwrap().clone())
@@ -109,7 +108,7 @@ impl Parser {
         };
 
         if open_bracer.name != TokenName::Bracket {
-            return Err(self.error(start_token.at, "word token uses only in function context"))
+            return Err(self.error(start_token.at, "word token uses only in function context"));
         }
 
         let end_bracer_position = match self.stream.search_idx_of_closed_bracer(self.current_position) {
@@ -120,18 +119,18 @@ impl Parser {
         let mut sub_nodes: Vec<Node> = Vec::new();
 
         if self.current_position != end_bracer_position - 1 {
-            let mut sub_parser = Parser::new(self.stream.clone(), self.current_position+1, end_bracer_position-1);
+            let mut sub_parser = Parser::new(self.stream.clone(), self.current_position + 1, end_bracer_position - 1);
 
             let sub_nodes_candidate = sub_parser.subparse_expressions();
             if sub_nodes_candidate.is_err() {
-                return sub_nodes_candidate
+                return sub_nodes_candidate;
             }
 
             sub_nodes = sub_nodes_candidate.unwrap()
         }
 
         if length.is_some() && sub_nodes.len() != length.unwrap() {
-            return Err(self.error(start_token.at, format!("expected {} nodes, got {}", sub_nodes.len(), length.unwrap()).as_str()))
+            return Err(self.error(start_token.at, format!("expected {} nodes, got {}", sub_nodes.len(), length.unwrap()).as_str()));
         }
 
         self.current_position = end_bracer_position;
@@ -172,19 +171,25 @@ impl Parser {
                     }
                 }
                 TokenName::Bracket => {
-
+                    self.current_position -= 1;
+                    match self.subparse_one_in_bracers() {
+                        Err(e) => return Err(e),
+                        Ok(sub_node) => {
+                            list.push(sub_node.clone_with_priority(0));
+                        }
+                    }
                 }
                 TokenName::Operator => {
-
+                    list.push(Node::new_operation(token.value, vec![], token.at));
                 }
                 TokenName::Number => {
-
+                    list.push(Node::new_number(token.value, token.at));
                 }
                 TokenName::String => {
-
+                    list.push(Node::new_string(token.value, token.at));
                 }
                 _ => {
-                    // Обработка других типов токенов аналогично
+                    return Err(self.error(token.at, "unexpected token"));
                 }
             }
 
@@ -195,54 +200,18 @@ impl Parser {
             self.current_position += 1;
         }
 
-        // let mut target_priority = 5; // 4 + 1
-
-        // loop {
-        //     list.next();
-        //
-        //     if list.is_end() {
-        //         list.rewind();
-        //         if target_priority == 0 {
-        //             break;
-        //         }
-        //         target_priority -= 1;
-        //     }
-        //
-        //     let current_node = list.current();
-        //
-        //     if current_node.get_priority() != target_priority {
-        //         continue;
-        //     }
-        //
-        //     current_node.deprioritize();
-        //
-        //     if list.left().is_none() {
-        //         continue;
-        //     }
-        //
-        //     for transformer in &transformers {
-        //         let (is_replaced, err) = transformer(&list);
-        //         if err.is_err() {
-        //             return Err(self.error(current_node.token_position, err.unwrap_err()));
-        //         }
-        //         if is_replaced {
-        //             break;
-        //         }
-        //     }
-        // }
-
-        Ok(list)
+        Ok(self.prioritize(list))
     }
 
     pub fn subparse_word(&mut self) -> Result<Node, String> {
         self.current_position += 1;
-        let next_token  = match self.stream.get(self.current_position) {
+        let next_token = match self.stream.get(self.current_position) {
             None => return Err(format!("unable to find token at {:?}", self.current_position)),
             Some(token) => token
         };
 
         if next_token.name != TokenName::Word {
-            return Err(self.error(self.current_position, "word token uses only in function context"))
+            return Err(self.error(self.current_position, "word token uses only in function context"));
         }
 
         Ok(Node::new_constant(next_token.value, self.current_position))
@@ -250,5 +219,107 @@ impl Parser {
 
     fn error(&self, position: usize, message: &str) -> String {
         crate::util::new_error(position, "".to_string(), message)
+    }
+
+    fn prioritize(&self, mut list: Vec<Node>) -> Vec<Node> {
+        let mut target_priority = 5; // 4 + 1
+        let mut pointer:usize = 0;
+
+        loop {
+            let mut current_node = &mut match list.get(pointer) {
+                Some(node) => node.clone(),
+                None => {
+                    pointer = 0;
+                    if target_priority == 0 {
+                        break;
+                    }
+                    target_priority -= 1;
+
+                    continue;
+                },
+            };
+            pointer+=1;
+
+            if current_node.get_priority() != target_priority {
+                continue;
+            }
+
+            current_node.deprioritize();
+
+            if list.get(pointer-1).is_none() {
+                continue;
+            }
+
+            for transformer in &[math_operations, function_call] {
+                match transformer(list, self.current_position) {
+                    None => continue,
+                    Some(lst) => {
+                        list = lst;
+
+                        break
+                    },
+                };
+            }
+        }
+
+        return list;
+    }
+}
+
+fn math_operations(mut list: Vec<Node>, pointer: usize) -> Option<Vec<Node>> {
+    // 1 + 1
+    if pointer < 1 || list.len() - pointer < 2 {
+        return None;
+    }
+
+    let lft = list.get(pointer-1).unwrap();
+    let cur = list.get(pointer).unwrap();
+    let rgt = list.get(pointer+1).unwrap();
+
+    if !cur.is_mathematical_operation() {
+        return None;
+    }
+
+    let to = [Node::new_operation(cur.value.raw(), vec![lft.clone(), rgt.clone()], cur.token_position)];
+
+    list.splice(pointer-1..pointer+2, to);
+
+    return Some(list);
+}
+
+fn function_call(mut list: Vec<Node>, pointer: usize) -> Option<Vec<Node>> {
+    // obj.method
+    if pointer < 1 || list.len() - pointer < 2 {
+        return None;
+    }
+
+    let lft = list.get(pointer-1).unwrap();
+    let cur = list.get(pointer).unwrap();
+    let rgt = list.get(pointer+1).unwrap();
+
+    if !cur.is_call_operation() {
+        return None;
+    }
+
+    let to = [Node::new_operation(rgt.value.raw(), vec![lft.clone()], cur.token_position)];
+
+    list.splice(pointer-1..pointer+2, to);
+
+    return Some(list);
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_math_operation_replacer() {
+        let list = vec![Node::new_number("1".to_string(), 0), Node::new_operation("+".to_string(), vec![], 1), Node::new_number("2".to_string(), 2)];
+
+        let new_list = math_operations(list, 1).unwrap();
+
+        assert_eq!(new_list.len(), 1);
+        assert_eq!(addr_of!(list), addr_of!(new_list))
     }
 }

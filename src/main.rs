@@ -5,24 +5,17 @@ mod util;
 
 use std::fs;
 use crate::lexer::{TokenStream};
+use crate::parser::Parser;
 
 fn main() {
     let input = fs::read_to_string("./.example/index.mp")
         .expect("Should have been able to read the file");
 
-    let mut stream = TokenStream::new(input)
-        .unwrap();
+    let stream = TokenStream::new(input).unwrap();
 
-    let mut i: usize = 0;
+    let mut parser = Parser::new_from_stream(stream);
 
-    loop {
-        let candidate = stream.get(i);
+    let tree = parser.parse_program().unwrap();
 
-        if candidate.is_none() {
-            break;
-        }
-        i += 1;
-
-        println!("{}", candidate.unwrap().to_string())
-    }
+    println!("{}", tree.format(0))
 }

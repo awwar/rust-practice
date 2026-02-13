@@ -15,10 +15,10 @@ enum NodeType {
 #[derive(Clone)]
 pub struct Node {
     node_type: NodeType,
-    value: Box<dyn ValueConverter>,
+    pub(crate) value: Box<dyn ValueConverter>,
     params: Vec<Node>,
     priority: usize,
-    token_position: usize,
+    pub(crate) token_position: usize,
 }
 
 const OPERATION_PRIORITY: [&'static str; 9] = ["+", "-", "*", "/", ">", "<", "=", "^", "."];
@@ -60,7 +60,7 @@ impl Node {
         node
     }
 
-    fn new_number(value: String, token_position: usize) -> Self {
+    pub(crate) fn new_number(value: String, token_position: usize) -> Self {
         let value_obj: Box<dyn ValueConverter>;
 
         if value.contains(".") {
@@ -78,7 +78,7 @@ impl Node {
         }
     }
 
-    fn new_string(value: String, token_position: usize) -> Self {
+    pub(crate) fn new_string(value: String, token_position: usize) -> Self {
         Self {
             node_type: NodeType::Constant,
             value: Box::new(Value::<String>(value)),
@@ -127,7 +127,7 @@ impl Node {
             token_position,
         }
     }
-    fn format(&self, indent: i32) -> String {
+    pub(crate) fn format(&self, indent: i32) -> String {
         let string_indent = "    ".repeat(indent as usize);
 
         let mut branches = "".to_string();
@@ -140,11 +140,13 @@ impl Node {
         format!("{}\n{}", self.value.raw(), branches)
     }
 
-    fn set_priority(mut self, priority: usize) {
-        self.priority = priority
+    pub fn clone_with_priority(mut self, priority: usize) -> Self {
+        let mut self_clone = self.clone();
+        self_clone.priority = priority;
+        return self_clone
     }
 
-    fn get_priority(self) -> usize {
+    pub(crate) fn get_priority(&self) -> usize {
         self.priority
     }
 
@@ -156,11 +158,11 @@ impl Node {
         self.params = vec![node];
     }
 
-    fn deprioritize(mut self) {
+    pub(crate) fn deprioritize(&mut self) {
         self.priority = 0
     }
 
-    fn is_mathematical_operation(&self) -> bool {
+    pub(crate) fn is_mathematical_operation(&self) -> bool {
         if self.node_type != NodeType::Operation {
             return false;
         }
@@ -175,11 +177,11 @@ impl Node {
         OPERATION_PRIORITY.contains(&&**&raw) && raw.ne(".")
     }
 
-    fn is_not_call_operation(&self) -> bool {
+    pub(crate) fn is_not_call_operation(&self) -> bool {
         !self.is_call_operation()
     }
 
-    fn is_call_operation(&self) -> bool {
+    pub(crate) fn is_call_operation(&self) -> bool {
         if self.node_type != NodeType::Operation {
             return false;
         }
