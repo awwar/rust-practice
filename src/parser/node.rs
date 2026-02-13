@@ -140,7 +140,7 @@ impl Node {
         format!("{}\n{}", self.value.raw(), branches)
     }
 
-    pub fn clone_with_priority(mut self, priority: usize) -> Self {
+    pub fn clone_with_priority(self, priority: usize) -> Self {
         let mut self_clone = self.clone();
         self_clone.priority = priority;
         return self_clone

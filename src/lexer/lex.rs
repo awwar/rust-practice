@@ -76,7 +76,7 @@ impl TokenStream {
                 _ => {}
             }
 
-            if current_position == 0 {
+            if counts == 0 {
                 return Some(current_position);
             }
 

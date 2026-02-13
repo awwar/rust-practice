@@ -97,6 +97,20 @@ impl Parser {
         Ok(sub_nodes.first().unwrap().clone())
     }
 
+    pub fn subparse_node(&mut self) -> Result<Node, String> {
+        self.current_position+=1;
+        let token = match self.stream.get(self.current_position) {
+            None => return Err(format!("unable to find token at {:?}", self.current_position)),
+            Some(token) => token
+        };
+
+        if token.name != TokenName::Word {
+            return Err(self.error(token.at, "node declaration must start with node name"));
+        }
+
+        Ok(sub_nodes.first().unwrap().clone())
+    }
+
     pub fn subparse_list_in_bracers(&mut self, length: Option<usize>) -> Result<Vec<Node>, String> {
         let start_token = self.stream.get(self.current_position).unwrap();
 
@@ -221,12 +235,14 @@ impl Parser {
         crate::util::new_error(position, "".to_string(), message)
     }
 
-    fn prioritize(&self, mut list: Vec<Node>) -> Vec<Node> {
+    fn prioritize(&self, input_list: Vec<Node>) -> Vec<Node> {
         let mut target_priority = 5; // 4 + 1
         let mut pointer:usize = 0;
 
+        let mut list = input_list.clone();
+
         loop {
-            let mut current_node = &mut match list.get(pointer) {
+            let current_node = &mut match list.get(pointer) {
                 Some(node) => node.clone(),
                 None => {
                     pointer = 0;
@@ -251,7 +267,7 @@ impl Parser {
             }
 
             for transformer in &[math_operations, function_call] {
-                match transformer(list, self.current_position) {
+                match transformer(list.clone(), self.current_position) {
                     None => continue,
                     Some(lst) => {
                         list = lst;
@@ -317,9 +333,8 @@ mod tests {
     fn test_math_operation_replacer() {
         let list = vec![Node::new_number("1".to_string(), 0), Node::new_operation("+".to_string(), vec![], 1), Node::new_number("2".to_string(), 2)];
 
-        let new_list = math_operations(list, 1).unwrap();
+        let new_list = math_operations(list.clone(), 1).unwrap();
 
         assert_eq!(new_list.len(), 1);
-        assert_eq!(addr_of!(list), addr_of!(new_list))
     }
 }
