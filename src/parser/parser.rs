@@ -1,6 +1,5 @@
 use crate::lexer::{TokenName, TokenStream};
 use crate::parser::node::{Node};
-use std::ptr::addr_of;
 
 pub struct Parser {
     first_position: usize,
@@ -41,6 +40,32 @@ impl Parser {
         }
 
         Ok(Node::new_program(list))
+    }
+
+    pub fn subparse_flow_link(&mut self) -> Result<Node, String> {
+        let token = match self.stream.get(self.current_position) {
+            None => return Err(format!("unable to find token at {:?}", self.current_position)),
+            Some(token) => token
+        };
+
+        if token.name != TokenName::Word || !token.starts_with("#") {
+            return Err(self.error(self.current_position, "flow link must start with #"));
+        }
+
+        Ok(Node::new_flow_link(token.value, token.at))
+    }
+
+    pub fn subparse_variable_name(&mut self) -> Result<Node, String> {
+        let token = match self.stream.get(self.current_position) {
+            None => return Err(format!("unable to find token at {:?}", self.current_position)),
+            Some(token) => token
+        };
+
+        if token.name != TokenName::Word || !token.starts_with("$") {
+            return Err(self.error(self.current_position, "variable must start with $"));
+        }
+
+        Ok(Node::new_variable(token.value, token.at))
     }
 
     pub fn subparse_flow_declaration(&mut self) -> Result<Node, String> {

@@ -212,7 +212,7 @@ impl Node {
         self.node_type == NodeType::Operation && (self.value.raw().contains(&['+', '-']))
     }
 
-    fn is_flow_link(&self) -> bool {
+    pub(crate) fn is_flow_link(&self) -> bool {
         self.node_type == NodeType::FlowLink
     }
 }

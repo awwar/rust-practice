@@ -1,7 +1,9 @@
+mod compiler;
 mod parser;
 mod lexer;
 mod program;
 mod util;
+mod operation;
 
 use std::fs;
 use crate::lexer::{TokenStream};
