@@ -23,14 +23,30 @@ pub trait ValueConverter {
     fn to_float(&self) -> Result<FloatValue, String>;
     fn to_bool(&self) -> Result<BoolValue, String>;
     fn to_string(&self) -> Result<StringValue, String>;
-    fn add(self, r: Self) -> Result<Self, String> where Self: Sized;
-    fn subtract(self, r: Self) -> Result<Self, String> where Self: Sized;
-    fn multiply(self, r: Self) -> Result<Self, String> where Self: Sized;
-    fn divide(self, r: Self) -> Result<Self, String> where Self: Sized;
-    fn power(self, r: Self) -> Result<Self, String> where Self: Sized;
-    fn more(self, r: Self) -> Result<BoolValue, String> where Self: Sized;
-    fn less(self, r: Self) -> Result<BoolValue, String> where Self: Sized;
-    fn eq(self, r: Self) -> Result<BoolValue, String> where Self: Sized;
+    fn add(self, r: Self) -> Result<Self, String>
+    where
+        Self: Sized;
+    fn subtract(self, r: Self) -> Result<Self, String>
+    where
+        Self: Sized;
+    fn multiply(self, r: Self) -> Result<Self, String>
+    where
+        Self: Sized;
+    fn divide(self, r: Self) -> Result<Self, String>
+    where
+        Self: Sized;
+    fn power(self, r: Self) -> Result<Self, String>
+    where
+        Self: Sized;
+    fn more(self, r: Self) -> Result<BoolValue, String>
+    where
+        Self: Sized;
+    fn less(self, r: Self) -> Result<BoolValue, String>
+    where
+        Self: Sized;
+    fn eq(self, r: Self) -> Result<BoolValue, String>
+    where
+        Self: Sized;
     fn clone_dyn(&self) -> Box<dyn ValueConverter>;
 }
 

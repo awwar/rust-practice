@@ -1,14 +1,10 @@
-mod call;
-mod r#if;
-
-use std::collections::LinkedList;
+use crate::compiler::SubCompiler;
 use crate::lexer::Token;
-use crate::parser::node::Node;
-use crate::parser::Parser;
+use crate::parser::{Node, Parser};
 use crate::program::{Program, ValueConverter};
-use crate::compiler::{SubCompiler};
+use std::collections::LinkedList;
 
-trait Procedure {
+pub trait Procedure {
     fn parse(token: Token, parser: Parser) -> Result<Node, String> {
         Ok(Node::new_operation(token.value, vec![], token.at))
     }
@@ -19,3 +15,16 @@ trait Procedure {
         panic!("procedure not implemented yet");
     }
 }
+
+pub struct ProcedureItem {
+    procedure: Box<dyn Procedure>,
+    name: String,
+}
+
+impl ProcedureItem {
+    pub fn new(procedure: Box<dyn Procedure>, name: String) -> ProcedureItem {
+        ProcedureItem { procedure, name }
+    }
+}
+
+inventory::collect!(ProcedureItem);

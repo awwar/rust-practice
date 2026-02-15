@@ -1,7 +1,7 @@
 use crate::program::{Value, ValueConverter, ValueType};
 use std::cmp::PartialEq;
 
-#[derive(PartialEq,Clone)]
+#[derive(PartialEq, Clone)]
 enum NodeType {
     Operation,
     Constant,
@@ -143,7 +143,7 @@ impl Node {
     pub fn clone_with_priority(self, priority: usize) -> Self {
         let mut self_clone = self.clone();
         self_clone.priority = priority;
-        return self_clone
+        return self_clone;
     }
 
     pub(crate) fn get_priority(&self) -> usize {

@@ -71,8 +71,8 @@ impl TokenStream {
             };
 
             match candidate.value.as_str() {
-                "(" => counts+=1,
-                ")" => counts-=1,
+                "(" => counts += 1,
+                ")" => counts -= 1,
                 _ => {}
             }
 
@@ -80,7 +80,7 @@ impl TokenStream {
                 return Some(current_position);
             }
 
-            current_position+=1
+            current_position += 1
         }
 
         None

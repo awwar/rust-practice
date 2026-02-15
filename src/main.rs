@@ -3,11 +3,11 @@ mod parser;
 mod lexer;
 mod program;
 mod util;
-mod operation;
+mod procedure;
 
-use std::fs;
-use crate::lexer::{TokenStream};
+use crate::lexer::TokenStream;
 use crate::parser::Parser;
+use std::fs;
 
 fn main() {
     let input = fs::read_to_string("./.example/index.mp")

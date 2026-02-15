@@ -1,5 +1,5 @@
 use crate::lexer::{TokenName, TokenStream};
-use crate::parser::node::{Node};
+use crate::parser::node::Node;
 
 pub struct Parser {
     first_position: usize,
@@ -123,7 +123,7 @@ impl Parser {
     }
 
     pub fn subparse_node(&mut self) -> Result<Node, String> {
-        self.current_position+=1;
+        self.current_position += 1;
         let token = match self.stream.get(self.current_position) {
             None => return Err(format!("unable to find token at {:?}", self.current_position)),
             Some(token) => token
@@ -133,7 +133,9 @@ impl Parser {
             return Err(self.error(token.at, "node declaration must start with node name"));
         }
 
-        Ok(sub_nodes.first().unwrap().clone())
+        // Ok(sub_nodes.first().unwrap().clone())
+
+        Err("asdasd".to_string())
     }
 
     pub fn subparse_list_in_bracers(&mut self, length: Option<usize>) -> Result<Vec<Node>, String> {
@@ -262,7 +264,7 @@ impl Parser {
 
     fn prioritize(&self, input_list: Vec<Node>) -> Vec<Node> {
         let mut target_priority = 5; // 4 + 1
-        let mut pointer:usize = 0;
+        let mut pointer: usize = 0;
 
         let mut list = input_list.clone();
 
@@ -277,9 +279,9 @@ impl Parser {
                     target_priority -= 1;
 
                     continue;
-                },
+                }
             };
-            pointer+=1;
+            pointer += 1;
 
             if current_node.get_priority() != target_priority {
                 continue;
@@ -287,7 +289,7 @@ impl Parser {
 
             current_node.deprioritize();
 
-            if list.get(pointer-1).is_none() {
+            if list.get(pointer - 1).is_none() {
                 continue;
             }
 
@@ -297,8 +299,8 @@ impl Parser {
                     Some(lst) => {
                         list = lst;
 
-                        break
-                    },
+                        break;
+                    }
                 };
             }
         }
@@ -313,9 +315,9 @@ fn math_operations(mut list: Vec<Node>, pointer: usize) -> Option<Vec<Node>> {
         return None;
     }
 
-    let lft = list.get(pointer-1).unwrap();
+    let lft = list.get(pointer - 1).unwrap();
     let cur = list.get(pointer).unwrap();
-    let rgt = list.get(pointer+1).unwrap();
+    let rgt = list.get(pointer + 1).unwrap();
 
     if !cur.is_mathematical_operation() {
         return None;
@@ -323,7 +325,7 @@ fn math_operations(mut list: Vec<Node>, pointer: usize) -> Option<Vec<Node>> {
 
     let to = [Node::new_operation(cur.value.raw(), vec![lft.clone(), rgt.clone()], cur.token_position)];
 
-    list.splice(pointer-1..pointer+2, to);
+    list.splice(pointer - 1..pointer + 2, to);
 
     return Some(list);
 }
@@ -334,9 +336,9 @@ fn function_call(mut list: Vec<Node>, pointer: usize) -> Option<Vec<Node>> {
         return None;
     }
 
-    let lft = list.get(pointer-1).unwrap();
+    let lft = list.get(pointer - 1).unwrap();
     let cur = list.get(pointer).unwrap();
-    let rgt = list.get(pointer+1).unwrap();
+    let rgt = list.get(pointer + 1).unwrap();
 
     if !cur.is_call_operation() {
         return None;
@@ -344,7 +346,7 @@ fn function_call(mut list: Vec<Node>, pointer: usize) -> Option<Vec<Node>> {
 
     let to = [Node::new_operation(rgt.value.raw(), vec![lft.clone()], cur.token_position)];
 
-    list.splice(pointer-1..pointer+2, to);
+    list.splice(pointer - 1..pointer + 2, to);
 
     return Some(list);
 }

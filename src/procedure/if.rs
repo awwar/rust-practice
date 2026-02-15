@@ -1,10 +1,9 @@
-use crate::lexer::{Token, TokenStream};
-use crate::operation::Procedure;
+use crate::lexer::Token;
 use crate::parser::{Node, Parser};
+use crate::procedure::procedure::ProcedureItem;
+use crate::procedure::Procedure;
 
-struct If {
-
-}
+struct If {}
 
 impl Procedure for If {
     fn parse(token: Token, mut parser: Parser) -> Result<Node, String> {
@@ -23,6 +22,12 @@ impl Procedure for If {
             return Err("if must have a 2 flow link".to_string());
         }
 
-        Ok(Node::new_operation(token.value, hash_links.clone(), token.at))
+        let params = vec![expr].into_iter().chain(hash_links.into_iter()).collect::<Vec<Node>>();
+
+        Ok(Node::new_operation(token.value, params, token.at))
     }
+}
+
+inventory::submit! {
+    ProcedureItem::new(Box::new(If{}), "IF".to_owned())
 }

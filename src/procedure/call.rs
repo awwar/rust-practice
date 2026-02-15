@@ -1,10 +1,9 @@
-use crate::lexer::{Token, TokenStream};
-use crate::operation::Procedure;
+use crate::lexer::Token;
 use crate::parser::{Node, Parser};
+use crate::procedure::procedure::ProcedureItem;
+use crate::procedure::Procedure;
 
-struct Call {
-
-}
+struct Call {}
 
 impl Procedure for Call {
     fn parse(token: Token, mut parser: Parser) -> Result<Node, String> {
@@ -24,8 +23,26 @@ impl Procedure for Call {
             Err(e) => return Err(e)
         };
 
-        let params  = vec![link, variable].into_iter().chain(args.into_iter()).collect::<Vec<Node>>();
+        let params = vec![link, variable].into_iter().chain(args.into_iter()).collect::<Vec<Node>>();
 
         Ok(Node::new_operation(token.value, params, token.at))
     }
 }
+
+inventory::submit! {
+    ProcedureItem::new(Box::new(Call{}), "call".to_owned())
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_convert_string_to_integer_when_ok() {
+        for flag in inventory::iter::<ProcedureItem> {
+            println!("{}", flag);
+        }
+    }
+}
+
