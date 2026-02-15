@@ -3,19 +3,17 @@ use crate::parser::node::Node;
 use crate::procedure::PROCEDURES;
 
 pub struct Parser {
-    first_position: usize,
     last_position: usize,
     current_position: usize,
     stream: TokenStream,
 }
 
 impl Parser {
-    pub fn new(stream: TokenStream, first_position: usize, last_position: usize) -> Self {
+    pub fn new(stream: TokenStream, current_position: usize, last_position: usize) -> Self {
         Parser {
             stream,
-            first_position,
             last_position,
-            current_position: first_position,
+            current_position,
         }
     }
 
@@ -27,10 +25,9 @@ impl Parser {
         let mut list = Vec::<Node>::new();
 
         loop {
-            match self.stream.get(self.current_position) {
-                None => break,
-                Some(token) => token
-            };
+            if self.stream.get(self.current_position).is_none() {
+                break;
+            }
 
             match self.subparse_flow_declaration() {
                 Ok(node) => list.push(node),
@@ -41,6 +38,62 @@ impl Parser {
         }
 
         Ok(Node::new_program(list))
+    }
+
+    pub fn subparse_flow_declaration(&mut self) -> Result<Node, String> {
+        let token = match self.stream.get(self.current_position) {
+            None => return Err(format!("unable to find token at {:?}", self.current_position)),
+            Some(token) => token
+        };
+
+        if token.name != TokenName::Word || !token.starts_with("#") {
+            return Err(self.error(self.current_position, "flow declaration must start with # and has argument and return value"));
+        }
+
+        let mut list = Vec::<Node>::new();
+
+        let next_token = match self.stream.get(self.current_position + 1) {
+            None => return Err(format!("unable to find token at {:?}", self.current_position + 1)),
+            Some(token) => token
+        };
+
+        if next_token.name != TokenName::Bracket {
+            return Err(self.error(next_token.at, "word token uses only in function context"));
+        }
+
+        let args = match self.subparse_list_in_bracers(None) {
+            Err(e) => return Err(e),
+            Ok(a) => a
+        };
+
+        list.extend(args);
+
+        let return_param = match self.subparse_word() {
+            Err(err) => return Err(err),
+            Ok(node) => node
+        };
+
+        list.push(return_param);
+
+        loop {
+            let next_token = match self.stream.get(self.current_position + 1) {
+                None => break,
+                Some(token) => token
+            };
+
+            if next_token.starts_with("#") {
+                break;
+            }
+
+            let node = match self.subparse_node() {
+                Err(err) => return Err(err),
+                Ok(node) => node
+            };
+
+            list.push(node);
+        }
+
+        Ok(Node::new_flow_declaration(token.value, list, token.at))
     }
 
     pub fn subparse_flow_link(&mut self) -> Result<Node, String> {
@@ -71,70 +124,11 @@ impl Parser {
         Ok(Node::new_variable(token.value, token.at))
     }
 
-    pub fn subparse_flow_declaration(&mut self) -> Result<Node, String> {
-        let token = match self.stream.get(self.current_position) {
-            None => return Err(format!("unable to find token at {:?}", self.current_position)),
-            Some(token) => token
-        };
-
-        if token.name != TokenName::Word || !token.starts_with("#") {
-            return Err(self.error(self.current_position, "flow declaration must start with # and has argument and return value"));
-        }
-
-        let mut list = Vec::<Node>::new();
-
-        let next_token = match self.stream.get(self.current_position + 1) {
-            None => return Err(format!("unable to find token at {:?}", self.current_position + 1)),
-            Some(token) => token
-        };
-
-        if next_token.name != TokenName::Bracket {
-            return Err(self.error(next_token.at, "word token uses only in function context"));
-        }
-
-        let args_candidates = self.subparse_list_in_bracers(None);
-        if args_candidates.is_err() {
-            return Err(args_candidates.err().unwrap());
-        }
-
-        list.extend(args_candidates.unwrap());
-
-        let return_param = match self.subparse_word() {
-            Err(err) => return Err(err),
-            Ok(node) => node
-        };
-
-        list.push(return_param);
-
-        loop {
-            let next_token = match self.stream.get(self.current_position + 1) {
-                None => break,
-                Some(token) => token
-            };
-
-            if next_token.starts_with("#") {
-                break;
-            }
-
-            let node = match self.subparse_node() {
-                Err(err) => return Err(err),
-                Ok(node) => node
-            };
-
-            list.push(node);
-        }
-
-        Ok(Node::new_flow_declaration(token.value, list, token.at))
-    }
-
     pub fn subparse_one_in_bracers(&mut self) -> Result<Node, String> {
-        let sub_node_candidates = self.subparse_list_in_bracers(Some(1));
-
-        if sub_node_candidates.is_err() {
-            return Err(sub_node_candidates.err().unwrap());
-        }
-
-        let sub_nodes = sub_node_candidates.unwrap();
+        let sub_nodes = match self.subparse_list_in_bracers(Some(1)) {
+            Err(e) => return Err(e),
+            Ok(a) => a
+        };
 
         if sub_nodes.len() != 1 {
             return Err(self.error(self.current_position, "expected 1 sub expression"));
@@ -154,9 +148,9 @@ impl Parser {
             return Err(self.error(token.at, "node declaration must start with node name"));
         }
 
-        for flag in PROCEDURES {
-            if flag.0.eq(token.value.to_string().to_uppercase().as_str()) {
-                return flag.1.parse(token.clone(), self);
+        for procs in PROCEDURES {
+            if procs.0.eq(&token.value.to_uppercase()) {
+                return procs.1.parse(token.clone(), self);
             }
         }
 
@@ -187,12 +181,10 @@ impl Parser {
         if self.current_position != end_bracer_position - 1 {
             let mut sub_parser = Parser::new(self.stream.clone(), self.current_position + 1, end_bracer_position - 1);
 
-            let sub_nodes_candidate = sub_parser.subparse_expressions();
-            if sub_nodes_candidate.is_err() {
-                return sub_nodes_candidate;
-            }
-
-            sub_nodes = sub_nodes_candidate.unwrap()
+            sub_nodes = match sub_parser.subparse_expressions() {
+                Err(err) => return Err(err),
+                Ok(sn) => sn
+            };
         }
 
         if length.is_some() && sub_nodes.len() != length.unwrap() {
@@ -206,14 +198,13 @@ impl Parser {
 
     pub fn subparse_expressions(&mut self) -> Result<Vec<Node>, String> {
         let mut list = Vec::<Node>::new();
+        let current_token = self.stream.get(self.current_position - 1).unwrap();
 
         loop {
-            let token = self.stream.get(self.current_position);
-            if token.is_none() {
-                let last_token = self.stream.get(self.current_position - 1).unwrap();
-                return Err(self.error(last_token.at, "cant find token"));
-            }
-            let token = token.unwrap();
+            let token = match self.stream.get(self.current_position) {
+                None => return Err(self.error(current_token.at, "expected next token")),
+                Some(token) => token
+            };
 
             match token.name {
                 TokenName::Comma => {
@@ -348,7 +339,7 @@ fn math_operations(mut list: Vec<Node>, pointer: usize) -> Option<Vec<Node>> {
         return None;
     }
 
-    let to = [Node::new_operation(cur.value.raw(), vec![lft.clone(), rgt.clone()], cur.token_position)];
+    let to = [Node::new_operation(cur.value.clone(), vec![lft.clone(), rgt.clone()], cur.token_position)];
 
     list.splice(pointer - 1..pointer + 2, to);
 
@@ -369,7 +360,7 @@ fn function_call(mut list: Vec<Node>, pointer: usize) -> Option<Vec<Node>> {
         return None;
     }
 
-    let to = [Node::new_operation(rgt.value.raw(), vec![lft.clone()], cur.token_position)];
+    let to = [Node::new_operation(rgt.value.clone(), vec![lft.clone()], cur.token_position)];
 
     list.splice(pointer - 1..pointer + 2, to);
 

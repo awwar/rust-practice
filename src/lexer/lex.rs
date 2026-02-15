@@ -89,7 +89,7 @@ impl TokenStream {
 
 #[derive(Clone)]
 pub struct Token {
-    pub(crate) name: TokenName,
+    pub name: TokenName,
     pub at: usize,
     pub value: String,
 }
@@ -101,9 +101,6 @@ impl Token {
             at: std::cmp::max(pos - value.len(), 0),
             value,
         }
-    }
-    pub fn to_string(&self) -> String {
-        format!("{} {} {}", self.at, format!("{:?}", self.name), self.value)
     }
     pub fn starts_with(&self, s: &str) -> bool {
         self.value.starts_with(s)

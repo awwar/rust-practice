@@ -2,7 +2,7 @@ use crate::lexer::Token;
 use crate::parser::{Node, Parser};
 use crate::procedure::Procedure;
 
-pub(crate) struct Return {}
+pub struct Return {}
 
 impl Procedure for Return {
     fn parse(&self, token: Token, parser: &mut Parser) -> Result<Node, String> {

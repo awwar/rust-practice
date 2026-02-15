@@ -7,7 +7,7 @@ pub trait SubCompiler {
 }
 
 impl SubCompiler for Compiler {
-    fn compile(&self, node: Node) -> Option<String> {
+    fn compile(&self, _node: Node) -> Option<String> {
         None
     }
 }
