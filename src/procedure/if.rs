@@ -1,12 +1,11 @@
 use crate::lexer::Token;
 use crate::parser::{Node, Parser};
-use crate::procedure::procedure::ProcedureItem;
 use crate::procedure::Procedure;
 
-struct If {}
+pub(crate) struct If {}
 
 impl Procedure for If {
-    fn parse(token: Token, mut parser: Parser) -> Result<Node, String> {
+    fn parse(&self, token: Token, parser: &mut Parser) -> Result<Node, String> {
         // IF (rand() > 1) (#MORE, #LESS)
         let expr = match parser.subparse_one_in_bracers() {
             Ok(l) => l,
@@ -26,8 +25,4 @@ impl Procedure for If {
 
         Ok(Node::new_operation(token.value, params, token.at))
     }
-}
-
-inventory::submit! {
-    ProcedureItem::new(Box::new(If{}), "IF".to_owned())
 }

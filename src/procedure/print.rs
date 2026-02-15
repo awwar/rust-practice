@@ -2,10 +2,10 @@ use crate::lexer::Token;
 use crate::parser::{Node, Parser};
 use crate::procedure::Procedure;
 
-struct Print {}
+pub(crate) struct Print {}
 
 impl Procedure for Print {
-    fn parse(token: Token, mut parser: Parser) -> Result<Node, String> {
+    fn parse(&self, token: Token, parser: &mut Parser) -> Result<Node, String> {
         // PRINT (expression)
         let expr = match parser.subparse_one_in_bracers() {
             Ok(l) => l,

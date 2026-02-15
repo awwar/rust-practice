@@ -1,13 +1,12 @@
 use crate::lexer::Token;
 use crate::parser::{Node, Parser};
-use crate::procedure::procedure::ProcedureItem;
 use crate::procedure::Procedure;
 
-struct Call {}
+pub(crate) struct Call {}
 
 impl Procedure for Call {
-    fn parse(token: Token, mut parser: Parser) -> Result<Node, String> {
-        // CALL #NAME $RESULT
+    fn parse(&self, token: Token, parser: &mut Parser) -> Result<Node, String> {
+        // CALL #NAME () $RESULT
         let link = match parser.subparse_flow_link() {
             Ok(l) => l,
             Err(e) => return Err(e)
@@ -29,19 +28,15 @@ impl Procedure for Call {
     }
 }
 
-inventory::submit! {
-    ProcedureItem::new(Box::new(Call{}), "call".to_owned())
-}
-
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::procedure::PROCEDURES;
 
     #[test]
     fn test_convert_string_to_integer_when_ok() {
-        for flag in inventory::iter::<ProcedureItem> {
-            println!("{}", flag);
+        for flag in PROCEDURES {
+            println!("{}", flag.0);
         }
     }
 }

@@ -1,5 +1,6 @@
 use crate::lexer::{TokenName, TokenStream};
 use crate::parser::node::Node;
+use crate::procedure::PROCEDURES;
 
 pub struct Parser {
     first_position: usize,
@@ -43,6 +44,7 @@ impl Parser {
     }
 
     pub fn subparse_flow_link(&mut self) -> Result<Node, String> {
+        self.current_position += 1;
         let token = match self.stream.get(self.current_position) {
             None => return Err(format!("unable to find token at {:?}", self.current_position)),
             Some(token) => token
@@ -56,6 +58,7 @@ impl Parser {
     }
 
     pub fn subparse_variable_name(&mut self) -> Result<Node, String> {
+        self.current_position += 1;
         let token = match self.stream.get(self.current_position) {
             None => return Err(format!("unable to find token at {:?}", self.current_position)),
             Some(token) => token
@@ -103,6 +106,24 @@ impl Parser {
 
         list.push(return_param);
 
+        loop {
+            let next_token = match self.stream.get(self.current_position + 1) {
+                None => break,
+                Some(token) => token
+            };
+
+            if next_token.starts_with("#") {
+                break;
+            }
+
+            let node = match self.subparse_node() {
+                Err(err) => return Err(err),
+                Ok(node) => node
+            };
+
+            list.push(node);
+        }
+
         Ok(Node::new_flow_declaration(token.value, list, token.at))
     }
 
@@ -133,9 +154,13 @@ impl Parser {
             return Err(self.error(token.at, "node declaration must start with node name"));
         }
 
-        // Ok(sub_nodes.first().unwrap().clone())
+        for flag in PROCEDURES {
+            if flag.0.eq(token.value.to_string().to_uppercase().as_str()) {
+                return flag.1.parse(token.clone(), self);
+            }
+        }
 
-        Err("asdasd".to_string())
+        Err(self.error(token.at, format!("token {} not supported", token.value).as_str()))
     }
 
     pub fn subparse_list_in_bracers(&mut self, length: Option<usize>) -> Result<Vec<Node>, String> {
@@ -311,7 +336,7 @@ impl Parser {
 
 fn math_operations(mut list: Vec<Node>, pointer: usize) -> Option<Vec<Node>> {
     // 1 + 1
-    if pointer < 1 || list.len() - pointer < 2 {
+    if pointer < 1 || list.len() < 2 + pointer {
         return None;
     }
 
@@ -332,7 +357,7 @@ fn math_operations(mut list: Vec<Node>, pointer: usize) -> Option<Vec<Node>> {
 
 fn function_call(mut list: Vec<Node>, pointer: usize) -> Option<Vec<Node>> {
     // obj.method
-    if pointer < 1 || list.len() - pointer < 2 {
+    if pointer < 1 || list.len() < 2 + pointer {
         return None;
     }
 

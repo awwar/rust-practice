@@ -1,5 +1,13 @@
 use crate::parser::Node;
 
+pub struct Compiler {}
+
 pub trait SubCompiler {
-    fn compile(node: Node) -> Option<String>;
+    fn compile(&self, node: Node) -> Option<String>;
+}
+
+impl SubCompiler for Compiler {
+    fn compile(&self, node: Node) -> Option<String> {
+        None
+    }
 }
