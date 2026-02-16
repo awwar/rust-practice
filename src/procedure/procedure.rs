@@ -1,20 +1,17 @@
-use crate::compiler::SubCompiler;
+use crate::compiler::Compiler;
 use crate::lexer::Token;
 use crate::parser::{Node, Parser};
-use crate::program::Program;
 use std::collections::LinkedList;
 
 pub trait Procedure {
     fn parse(&self, token: Token, _parser: &mut Parser) -> Result<Node, String> {
         Ok(Node::new_operation(token.value, vec![], token.at))
     }
-    fn compile(&self, _prog: Program, node: Node, sub_compiler: impl SubCompiler) -> Option<String>
-    where
-        Self: Sized,
+    fn compile(&self, sc: &mut Compiler, node: Node) -> Result<(), String>
     {
-        sub_compiler.compile(node)
+        sc.compile(node)
     }
-    fn execute(&self, _argc: usize, _stack: LinkedList<String>) -> Option<String> {
+    fn execute(&self, _argc: usize, _stack: LinkedList<String>) -> Result<(), String> {
         panic!("procedure not implemented yet");
     }
 }

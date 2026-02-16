@@ -1,7 +1,7 @@
 use std::cmp::PartialEq;
 
 #[derive(PartialEq, Clone)]
-enum NodeType {
+pub enum NodeType {
     Operation,
     Constant,
     String,
@@ -15,9 +15,9 @@ enum NodeType {
 
 #[derive(Clone)]
 pub struct Node {
-    node_type: NodeType,
+    pub node_type: NodeType,
     pub value: String,
-    params: Vec<Node>,
+    pub params: Vec<Node>,
     priority: usize,
     pub token_position: usize,
 }

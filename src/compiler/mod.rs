@@ -1,3 +1,3 @@
 mod compiler;
 
-pub use crate::compiler::compiler::SubCompiler;
+pub use crate::compiler::compiler::Compiler;

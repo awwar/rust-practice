@@ -5,6 +5,7 @@ mod program;
 mod util;
 mod procedure;
 
+use crate::compiler::Compiler;
 use crate::lexer::TokenStream;
 use crate::parser::Parser;
 use std::fs;
@@ -19,5 +20,11 @@ fn main() {
 
     let tree = parser.parse_program().unwrap();
 
-    println!("{}", tree.format(0))
+    println!("{}", tree.format(0));
+
+    let mut compiler = Compiler::new();
+
+    compiler.compile(tree).unwrap();
+
+    println!("{}", compiler.program.to_string())
 }

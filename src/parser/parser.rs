@@ -66,7 +66,6 @@ impl Parser {
             Ok(a) => a
         };
 
-        list.extend(args);
 
         let return_param = match self.subparse_word() {
             Err(err) => return Err(err),
@@ -74,6 +73,8 @@ impl Parser {
         };
 
         list.push(return_param);
+        list.push(Node::new_number(args.len().to_string(), 0));
+        list.extend(args);
 
         loop {
             let next_token = match self.stream.get(self.current_position + 1) {
@@ -148,9 +149,9 @@ impl Parser {
             return Err(self.error(token.at, "node declaration must start with node name"));
         }
 
-        for procs in PROCEDURES {
-            if procs.0.eq(&token.value.to_uppercase()) {
-                return procs.1.parse(token.clone(), self);
+        for proc in PROCEDURES {
+            if proc.0.eq(&token.value.to_uppercase()) {
+                return proc.1.parse(token.clone(), self);
             }
         }
 

@@ -8,7 +8,7 @@ mod procedure;
 
 pub use crate::procedure::procedure::Procedure;
 
-pub const PROCEDURES: &[(&str, &'static dyn Procedure); 13] = &[
+pub const PROCEDURES: &[(&str, &dyn Procedure); 13] = &[
     ("CALL", &call::Call {}),
     ("IF", &r#if::If {}),
     ("PRINT", &print::Print {}),
