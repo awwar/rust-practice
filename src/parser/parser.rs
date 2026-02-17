@@ -1,6 +1,6 @@
 use crate::lexer::{TokenName, TokenStream};
 use crate::parser::node::Node;
-use crate::procedure::PROCEDURES;
+use crate::procedure::get_procedures;
 
 pub struct Parser {
     last_position: usize,
@@ -149,10 +149,10 @@ impl Parser {
             return Err(self.error(token.at, "node declaration must start with node name"));
         }
 
-        for proc in PROCEDURES {
-            if proc.0.eq(&token.value.to_uppercase()) {
-                return proc.1.parse(token.clone(), self);
-            }
+        let binding = get_procedures();
+        let proc = binding.get(&token.value.to_uppercase());
+        if proc.is_some() {
+            return proc.unwrap().parse(token.clone(), self);
         }
 
         Err(self.error(token.at, format!("token {} not supported", token.value).as_str()))

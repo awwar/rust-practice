@@ -1,3 +1,4 @@
+use crate::compiler::Compiler;
 use crate::lexer::Token;
 use crate::parser::{Node, Parser};
 use crate::procedure::Procedure;
@@ -22,22 +23,19 @@ impl Procedure for Call {
             Err(e) => return Err(e)
         };
 
-        let params = vec![link, variable].into_iter().chain(args.into_iter()).collect::<Vec<Node>>();
+        let mut params = vec![link, variable];
+        params.extend(args);
 
         Ok(Node::new_operation(token.value, params, token.at))
     }
-}
-
-
-#[cfg(test)]
-mod tests {
-    use crate::procedure::PROCEDURES;
-
-    #[test]
-    fn test_convert_string_to_integer_when_ok() {
-        for flag in PROCEDURES {
-            println!("{}", flag.0);
+    fn compile(&self, sc: &mut Compiler, node: Node) -> Result<(), String> {
+        for n in node.params.iter().skip(2) {
+            sc.sub_compile(n.clone()).unwrap();
         }
+
+        sc.program.new_jmp(node.params.get(0).unwrap().value.clone());
+        sc.program.new_var(node.params.get(1).unwrap().value.clone());
+
+        Ok(())
     }
 }
-

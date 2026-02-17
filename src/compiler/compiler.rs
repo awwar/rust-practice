@@ -1,5 +1,5 @@
 use crate::parser::{Node, NodeType};
-use crate::procedure::PROCEDURES;
+use crate::procedure::get_procedures;
 use crate::program::Program;
 
 pub struct Compiler {
@@ -8,58 +8,71 @@ pub struct Compiler {
 
 impl Compiler {
     pub fn new() -> Compiler {
-        Compiler { program: Program::new() }
+        Compiler {
+            program: Program::new(),
+        }
     }
     pub fn compile(&mut self, node: Node) -> Result<(), String> {
         let node_copy = node.clone();
-        let node_type = node.node_type;
+        let node_type: NodeType = node.node_type;
+
+        if node_type == NodeType::Operation {
+            let binding = get_procedures();
+            let proc = binding.get(&node_copy.value.to_uppercase());
+            if proc.is_some() {
+                let mut sub_compiler = Compiler::new();
+
+                proc.unwrap().compile(&mut sub_compiler, node_copy.clone()).unwrap();
+
+                self.program.merge(sub_compiler.program);
+
+                return Ok(());
+            }
+        }
+
+        self.sub_compile(node_copy)
+    }
+
+    pub fn sub_compile(&mut self, node: Node) -> Result<(), String> {
+        let node_copy = node.clone();
+        let node_type: NodeType = node.node_type;
+
+        let mut from_param: usize = 0;
 
         if node_type == NodeType::FlowDeclaration {
-            self.program.new_mark(node.value);
+            self.program.new_mark(node_copy.value.clone());
 
             let mut i = 0;
             let mut argc = 0;
-            for child in node.params.iter() {
+            for child in node_copy.params.iter() {
                 if i == 0 {
                     //ToDo redo when return type will support
                 } else if i == 1 {
-                    argc = child.value.parse::<i32>().unwrap()
-                } else if i < argc + 2 {
+                    argc = child.value.parse::<i32>().unwrap();
+                    from_param = (argc + 2) as usize;
+                } else if i < from_param {
                     self.program.new_var(child.value.clone());
                 } else {
-                    self.program.new_exec(child.value.clone(), child.params.len());
+                    break
                 }
                 i += 1
             }
-
-            return Ok(());
         }
 
-        for child in node.params.iter() {
-            match self.compile(child.clone()) {
+        for child in node_copy.params.iter().skip(from_param) {
+            let child_copy = child.clone();
+            match self.compile(child_copy) {
                 Err(e) => return Err(e),
                 _ => {}
             }
         }
 
         if node_type == NodeType::Variable {
-            self.program.new_push(node.value);
+            self.program.new_push(node_copy.value.clone());
         } else if node_type == NodeType::Operation {
-            for proc in PROCEDURES {
-                if proc.0.eq(&node.value.to_uppercase()) {
-                    let mut sub_compiler = Compiler::new();
-
-                    proc.1.compile(&mut sub_compiler, node_copy.clone()).unwrap();
-
-                    self.program.merge(sub_compiler.program);
-
-                    return Ok(());
-                }
-            }
-
-            self.program.new_exec(node.value, node.params.len());
-        } else if node_type == NodeType::Constant {
-            self.program.new_push(node.value);
+            self.program.new_exec(node_copy.value.clone(), node_copy.params.len());
+        } else if node_type == NodeType::Constant || node_type == NodeType::Float || node_type == NodeType::Integer {
+            self.program.new_push(node_copy.value.clone());
         }
 
         Ok(())

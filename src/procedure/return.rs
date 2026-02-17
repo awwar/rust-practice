@@ -1,3 +1,4 @@
+use crate::compiler::Compiler;
 use crate::lexer::Token;
 use crate::parser::{Node, Parser};
 use crate::procedure::Procedure;
@@ -13,5 +14,10 @@ impl Procedure for Return {
         };
 
         Ok(Node::new_operation(token.value, vec![expr], token.at))
+    }
+    fn compile(&self, sc: &mut Compiler, node: Node) -> Result<(), String> {
+        let child = node.params.get(0).unwrap();
+
+        sc.sub_compile(child.clone())
     }
 }

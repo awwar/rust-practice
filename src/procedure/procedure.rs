@@ -9,7 +9,7 @@ pub trait Procedure {
     }
     fn compile(&self, sc: &mut Compiler, node: Node) -> Result<(), String>
     {
-        sc.compile(node)
+        sc.sub_compile(node)
     }
     fn execute(&self, _argc: usize, _stack: LinkedList<String>) -> Result<(), String> {
         panic!("procedure not implemented yet");

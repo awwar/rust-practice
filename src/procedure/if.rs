@@ -1,3 +1,4 @@
+use crate::compiler::Compiler;
 use crate::lexer::Token;
 use crate::parser::{Node, Parser};
 use crate::procedure::Procedure;
@@ -21,8 +22,21 @@ impl Procedure for If {
             return Err("if must have a 2 flow link".to_string());
         }
 
-        let params = vec![expr].into_iter().chain(hash_links.into_iter()).collect::<Vec<Node>>();
+        let mut params = vec![expr];
+        params.extend(hash_links);
 
         Ok(Node::new_operation(token.value, params, token.at))
+    }
+    fn compile(&self, sc: &mut Compiler, node: Node) -> Result<(), String> {
+        let expr = node.params.get(0).unwrap().clone();
+
+        sc.sub_compile(expr).unwrap();
+
+        sc.program.new_cskip(2);
+        sc.program.new_jmp(node.params.get(2).unwrap().value.clone());
+        sc.program.new_cskip(1);
+        sc.program.new_jmp(node.params.get(1).unwrap().value.clone());
+
+        Ok(())
     }
 }
