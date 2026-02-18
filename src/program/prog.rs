@@ -11,9 +11,9 @@ const CSKIP: OperationName = "CSKIP";
 const SKIP: OperationName = "SKIP";
 
 struct Operation {
-    name: OperationName,
-    count: usize,
-    word: String,
+    pub name: OperationName,
+    pub count: usize,
+    pub word: String,
 }
 
 impl Operation {

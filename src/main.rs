@@ -4,6 +4,7 @@ mod lexer;
 mod program;
 mod util;
 mod procedure;
+mod vm;
 
 use crate::compiler::Compiler;
 use crate::lexer::TokenStream;

@@ -72,9 +72,8 @@ impl Parser {
             Ok(node) => node
         };
 
-        list.push(return_param);
-        list.push(Node::new_number(args.len().to_string(), 0));
         list.extend(args);
+        list.push(return_param);
 
         loop {
             let next_token = match self.stream.get(self.current_position + 1) {
@@ -306,12 +305,12 @@ impl Parser {
 
             current_node.deprioritize();
 
-            if list.get(pointer - 1).is_none() {
-                continue;
-            }
+            // if list.get(pointer - 1).is_none() {
+            //     continue;
+            // }
 
             for transformer in &[math_operations, function_call] {
-                match transformer(list.clone(), self.current_position) {
+                match transformer(list.clone(), pointer) {
                     None => continue,
                     Some(lst) => {
                         list = lst;

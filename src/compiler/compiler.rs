@@ -38,24 +38,19 @@ impl Compiler {
         let node_type: NodeType = node.node_type;
 
         let mut from_param: usize = 0;
-
         if node_type == NodeType::FlowDeclaration {
             self.program.new_mark(node_copy.value.clone());
 
-            let mut i = 0;
-            let mut argc = 0;
             for child in node_copy.params.iter() {
-                if i == 0 {
-                    //ToDo redo when return type will support
-                } else if i == 1 {
-                    argc = child.value.parse::<i32>().unwrap();
-                    from_param = (argc + 2) as usize;
-                } else if i < from_param {
-                    self.program.new_var(child.value.clone());
-                } else {
-                    break
+                from_param += 1;
+                if child.node_type == NodeType::Constant {
+                    break;
                 }
-                i += 1
+                self.program.new_exec(child.value.clone(), 1);
+                if child.params.len() != 1 {
+                    return Err(format!("Invalid number of flow arguments: {}", child.params.len()));
+                }
+                self.program.new_var(child.params.get(0).unwrap().value.clone());
             }
         }
 
@@ -71,7 +66,7 @@ impl Compiler {
             self.program.new_push(node_copy.value.clone());
         } else if node_type == NodeType::Operation {
             self.program.new_exec(node_copy.value.clone(), node_copy.params.len());
-        } else if node_type == NodeType::Constant || node_type == NodeType::Float || node_type == NodeType::Integer {
+        } else if node_type == NodeType::Constant || node_type == NodeType::Float || node_type == NodeType::Integer || node_type == NodeType::String {
             self.program.new_push(node_copy.value.clone());
         }
 
