@@ -4,7 +4,7 @@ use std::collections::{HashMap, LinkedList};
 type Stack = LinkedList<String>;
 type Memo = HashMap<String, String>;
 
-pub fn execute(mut pr: &Program) {
+pub fn execute(pr: &mut Program) {
     let mut stack = &Stack::new();
     let mut memo = &Memo::new();
 
@@ -28,13 +28,13 @@ pub fn execute(mut pr: &Program) {
     }
 }
 
-fn get_op_executable() -> HashMap<String, fn(&Program, &Stack, &Memo) -> ()> {
-    let mut procedures = HashMap::<String, fn(&Program, &Stack, &Memo) -> ()>::new();
+fn get_op_executable() -> HashMap<String, fn(&mut Program, &Stack, &Memo) -> ()> {
+    let mut procedures = HashMap::<String, fn(&mut Program, &Stack, &Memo) -> ()>::new();
 
-    procedures.insert("JMP".to_string(), |mut pr: &Program, st: &Stack, mem: &Memo| {
-        let op = pr.current().unwrap().clone();
+    procedures.insert("JMP".to_string(), |pr: &mut Program, st: &Stack, mem: &Memo| {
+        let mark_name = pr.current().unwrap().word.clone();
         pr.trace_back();
-        pr.jump_to_mark(op.word.clone());
+        pr.jump_to_mark(mark_name);
     });
 
     return procedures;

@@ -10,7 +10,7 @@ const VAR: OperationName = "VAR";
 const CSKIP: OperationName = "CSKIP";
 const SKIP: OperationName = "SKIP";
 
-struct Operation {
+pub struct Operation {
     pub name: OperationName,
     pub count: usize,
     pub word: String,
