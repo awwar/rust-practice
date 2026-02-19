@@ -34,7 +34,7 @@ impl Operation {
     pub fn new_word_count(name: OperationName, word: String, count: usize) -> Self {
         Self { name, word, count }
     }
-    fn to_string(&self) -> String {
+    pub fn to_string(&self) -> String {
         format!("{} {} {}", self.name, self.word, self.count)
     }
 }
@@ -89,7 +89,7 @@ impl Program {
     pub fn next(&mut self) {
         self.op_idx += 1;
 
-        if self.is_end() {
+        if !self.is_end() {
             return;
         }
 
@@ -106,16 +106,24 @@ impl Program {
         self.trace.push_front(self.op_idx + 1)
     }
     pub fn skip(&mut self, num: usize) {
+        if num == 0 || self.op_idx > 0 {
+            self.op_idx -= 1;
+            return;
+        }
         self.op_idx += num
     }
     pub fn jump_to_mark(&mut self, name: String) {
+        let mut i = 0;
         for op in self.ops.iter() {
-            if op.name != MARK {
+            i+=1;
+            if op.name.ne(MARK) {
                 continue;
             }
 
             if op.word == name {
-                self.op_idx = op.count;
+                self.op_idx = i-1;
+
+                return;
             }
         }
 

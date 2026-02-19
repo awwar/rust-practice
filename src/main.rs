@@ -10,6 +10,7 @@ use crate::compiler::Compiler;
 use crate::lexer::TokenStream;
 use crate::parser::Parser;
 use std::fs;
+use crate::vm::execute;
 
 fn main() {
     let input = fs::read_to_string("./.example/index.mp")
@@ -27,5 +28,9 @@ fn main() {
 
     compiler.compile(tree).unwrap();
 
-    println!("{}", compiler.program.to_string())
+    let prog = &mut compiler.program;
+
+    println!("{}", prog.to_string());
+
+    execute(prog)
 }
