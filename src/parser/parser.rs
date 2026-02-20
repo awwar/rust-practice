@@ -148,8 +148,9 @@ impl Parser {
             return Err(self.error(token.at, "node declaration must start with node name"));
         }
 
-        let binding = get_procedures();
-        let proc = binding.get(&token.value.to_uppercase());
+        let procedures = get_procedures();
+        let proc_name = token.value.to_uppercase();
+        let proc = procedures.get(&proc_name.as_str());
         if proc.is_some() {
             return proc.unwrap().parse(token.clone(), self);
         }

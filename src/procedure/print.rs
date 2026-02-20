@@ -1,6 +1,7 @@
 use crate::lexer::Token;
 use crate::parser::{Node, Parser};
 use crate::procedure::Procedure;
+use std::collections::LinkedList;
 
 pub struct Print {}
 
@@ -13,5 +14,16 @@ impl Procedure for Print {
         };
 
         Ok(Node::new_operation(token.value, vec![expr], token.at))
+    }
+    fn execute(&self, argc: usize, stack: &mut LinkedList<String>) -> Result<(), String> {
+        if argc != 1 {
+            return Err(String::from("argument count must be 1"));
+        }
+
+        let first_operand = stack.pop_back().unwrap();
+
+        println!("{}", first_operand);
+
+        Ok(())
     }
 }

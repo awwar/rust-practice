@@ -18,7 +18,8 @@ impl Compiler {
 
         if node_type == NodeType::Operation {
             let binding = get_procedures();
-            let proc = binding.get(&node_copy.value.to_uppercase());
+            let proc_name = node_copy.value.clone();
+            let proc = binding.get(&proc_name.as_str());
             if proc.is_some() {
                 let mut sub_compiler = Compiler::new();
 

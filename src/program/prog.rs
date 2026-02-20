@@ -35,7 +35,11 @@ impl Operation {
         Self { name, word, count }
     }
     pub fn to_string(&self) -> String {
-        format!("{} {} {}", self.name, self.word, self.count)
+        if self.count == 0 {
+            format!("{} {}", self.name, self.word)
+        } else {
+            format!("{} {} {}", self.name, self.word, self.count)
+        }
     }
 }
 
@@ -106,7 +110,7 @@ impl Program {
         self.trace.push_front(self.op_idx + 1)
     }
     pub fn skip(&mut self, num: usize) {
-        if num == 0 || self.op_idx > 0 {
+        if num == 0 && self.op_idx > 0 {
             self.op_idx -= 1;
             return;
         }
@@ -115,13 +119,13 @@ impl Program {
     pub fn jump_to_mark(&mut self, name: String) {
         let mut i = 0;
         for op in self.ops.iter() {
-            i+=1;
+            i += 1;
             if op.name.ne(MARK) {
                 continue;
             }
 
             if op.word == name {
-                self.op_idx = i-1;
+                self.op_idx = i - 1;
 
                 return;
             }

@@ -28,7 +28,7 @@ impl Node {
     pub fn new_program(params: Vec<Self>) -> Self {
         Self {
             node_type: NodeType::Program,
-            value: "root".to_string(),
+            value: "ROOT".to_string(),
             params,
             priority: 4,
             token_position: 0,
@@ -38,7 +38,7 @@ impl Node {
     pub fn new_constant(value: String, token_position: usize) -> Self {
         Self {
             node_type: NodeType::Constant,
-            value,
+            value: value,
             params: vec![],
             priority: 4,
             token_position,
@@ -50,7 +50,7 @@ impl Node {
 
         let mut node = Node {
             node_type: NodeType::Operation,
-            value: operation,
+            value: operation.to_uppercase(),
             params,
             priority,
             token_position,
@@ -94,7 +94,7 @@ impl Node {
     pub fn new_flow_declaration(value: String, params: Vec<Self>, token_position: usize) -> Self {
         Self {
             node_type: NodeType::FlowDeclaration,
-            value,
+            value: value.to_uppercase(),
             params,
             priority: 4,
             token_position,
@@ -104,7 +104,7 @@ impl Node {
     pub fn new_flow_link(value: String, token_position: usize) -> Self {
         Self {
             node_type: NodeType::FlowLink,
-            value,
+            value: value.to_uppercase(),
             params: vec![],
             priority: 4,
             token_position,
@@ -114,7 +114,7 @@ impl Node {
     pub fn new_variable(value: String, token_position: usize) -> Self {
         Self {
             node_type: NodeType::Variable,
-            value,
+            value: value.to_uppercase(),
             params: vec![],
             priority: 4,
             token_position,

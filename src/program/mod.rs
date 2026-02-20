@@ -1,4 +1,4 @@
 pub mod value;
 pub mod prog;
 
-pub use crate::program::prog::{Program, Operation};
+pub use crate::program::prog::{Operation, Program};

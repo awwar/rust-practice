@@ -1,3 +1,4 @@
 pub mod vm;
+mod operation;
 
-pub use crate::vm::vm::{execute};
+pub use crate::vm::vm::execute;

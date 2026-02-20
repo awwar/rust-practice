@@ -9,8 +9,8 @@ mod vm;
 use crate::compiler::Compiler;
 use crate::lexer::TokenStream;
 use crate::parser::Parser;
-use std::fs;
 use crate::vm::execute;
+use std::fs;
 
 fn main() {
     let input = fs::read_to_string("./.example/index.mp")
