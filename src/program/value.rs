@@ -1,5 +1,5 @@
 #[derive(PartialEq)]
-pub enum ValueType {
+enum ValueType {
     Integer,
     Float,
     Boolean,
@@ -7,7 +7,7 @@ pub enum ValueType {
 }
 
 #[derive(Clone)]
-pub struct Value<T>(pub T);
+struct Value<T>(pub T);
 
 // may be  union Val { f: f64, i: i64, b: bool } or enum Val { Int(u64), Float(f64), Boolean(bool), String(String) }
 
@@ -16,7 +16,7 @@ type FloatValue = Value<f64>;
 type BoolValue = Value<bool>;
 type StringValue = Value<String>;
 
-pub trait ValueConverter {
+trait ValueConverter {
     fn raw(&self) -> String;
     fn type_name(&self) -> ValueType;
     fn to_integer(&self) -> Result<IntegerValue, String>;

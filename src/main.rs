@@ -11,6 +11,7 @@ use crate::lexer::TokenStream;
 use crate::parser::Parser;
 use crate::vm::execute;
 use std::fs;
+use std::time::Instant;
 
 fn main() {
     let input = fs::read_to_string("./.example/index.mp")
@@ -32,5 +33,11 @@ fn main() {
 
     println!("{}", prog.to_string());
 
-    execute(prog)
+    let now = Instant::now();
+
+    for _ in 0..100_000 {
+        execute(prog)
+    }
+
+    println!("{}ms", now.elapsed().as_millis());
 }

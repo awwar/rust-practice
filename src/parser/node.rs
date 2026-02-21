@@ -38,7 +38,7 @@ impl Node {
     pub fn new_constant(value: String, token_position: usize) -> Self {
         Self {
             node_type: NodeType::Constant,
-            value: value,
+            value,
             params: vec![],
             priority: 4,
             token_position,
@@ -84,7 +84,7 @@ impl Node {
     pub fn new_string(value: String, token_position: usize) -> Self {
         Self {
             node_type: NodeType::String,
-            value,
+            value: value.strip_prefix('"').unwrap().strip_suffix('"').unwrap().to_string(),
             params: vec![],
             priority: 4,
             token_position,

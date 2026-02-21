@@ -16,7 +16,8 @@ return (void(0))
 print ("you're WIN!")
 
 #LESS() bool
-var (sum("you're lose ", $SOME_VALUE, " points!")) $OUT_RESULT
+var (string($SOME_VALUE)) $STR_SOME_VALUE
+var (sum("you're lose ", $STR_SOME_VALUE, " points!")) $OUT_RESULT
 
 print ($OUT_RESULT)
 

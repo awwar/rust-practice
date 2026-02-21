@@ -1,20 +1,21 @@
 use crate::procedure::Procedure;
-use std::collections::LinkedList;
+use crate::program::Value;
+use crate::vm::Stack;
 
 pub struct Sum {}
 
 impl Procedure for Sum {
-    fn execute(&self, argc: usize, stack: &mut LinkedList<String>) -> Result<(), String> {
+    fn execute(&self, argc: usize, stack: &mut Stack) -> Result<(), String> {
         if argc == 0 {
             return Ok(());
         }
 
-        let mut result: String = stack.pop_front().unwrap();
+        let mut result: Value = stack.pop_front().unwrap();
 
         for _ in 1..argc {
             let operand = stack.pop_front().unwrap();
 
-            result = format!("{}{}", operand, result);
+            result = operand.add(&result);
         }
 
         stack.push_front(result);

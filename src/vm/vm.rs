@@ -1,11 +1,11 @@
-use crate::program::{Operation, Program};
+use crate::program::{Operation, Program, Value};
 use crate::vm::operation::get_op_executable;
 use std::collections::{HashMap, LinkedList};
 use std::time::Duration;
 use std::{env, thread};
 
-pub(crate) type Stack = LinkedList<String>;
-pub(crate) type Memo = HashMap<String, String>;
+pub type Stack = LinkedList<Value>;
+pub type Memo = HashMap<String, Value>;
 
 pub fn execute(pr: &mut Program) {
     let stack = &mut Stack::new();

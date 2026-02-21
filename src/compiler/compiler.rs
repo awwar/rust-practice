@@ -1,6 +1,6 @@
 use crate::parser::{Node, NodeType};
 use crate::procedure::get_procedures;
-use crate::program::Program;
+use crate::program::{Program, Value};
 
 pub struct Compiler {
     pub program: Program,
@@ -64,11 +64,15 @@ impl Compiler {
         }
 
         if node_type == NodeType::Variable {
-            self.program.new_push(node_copy.value.clone());
+            self.program.new_push(Value::String(node_copy.value.clone()));
         } else if node_type == NodeType::Operation {
             self.program.new_exec(node_copy.value.clone(), node_copy.params.len());
-        } else if node_type == NodeType::Constant || node_type == NodeType::Float || node_type == NodeType::Integer || node_type == NodeType::String {
-            self.program.new_push(node_copy.value.clone());
+        } else if node_type == NodeType::Constant || node_type == NodeType::String {
+            self.program.new_push(Value::String(node_copy.value.clone()));
+        } else if node_type == NodeType::Float {
+            self.program.new_push(Value::Float(node_copy.value.parse::<f64>().unwrap()));
+        } else if node_type == NodeType::Integer {
+            self.program.new_push(Value::Integer(node_copy.value.parse::<i64>().unwrap()));
         }
 
         Ok(())

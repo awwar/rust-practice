@@ -1,3 +1,4 @@
+use crate::program::Value;
 use std::collections::LinkedList;
 
 type OperationName = &'static str;
@@ -12,34 +13,58 @@ const SKIP: OperationName = "SKIP";
 
 pub struct Operation {
     pub name: OperationName,
-    pub count: usize,
-    pub word: String,
+    pub count: Option<usize>,
+    pub word: Option<String>,
+    pub value: Option<Value>,
 }
 
 impl Operation {
+    pub fn new_value(name: OperationName, value: Value) -> Self {
+        Self {
+            name,
+            value: Some(value),
+            word: None,
+            count: None,
+        }
+    }
     pub fn new_word(name: OperationName, word: String) -> Self {
         Self {
             name,
-            word,
-            count: 0,
+            word: Some(word),
+            count: None,
+            value: None,
         }
     }
     pub fn new_count(name: OperationName, count: usize) -> Self {
         Self {
             name,
-            word: "".to_string(),
-            count,
+            count: Some(count),
+            value: None,
+            word: None,
         }
     }
     pub fn new_word_count(name: OperationName, word: String, count: usize) -> Self {
-        Self { name, word, count }
+        Self {
+            name,
+            word: Some(word),
+            count: Some(count),
+            value: None,
+        }
     }
     pub fn to_string(&self) -> String {
-        if self.count == 0 {
-            format!("{} {}", self.name, self.word)
-        } else {
-            format!("{} {} {}", self.name, self.word, self.count)
+        let mut sb = format!("{}", self.name).to_string();
+
+        if self.word.is_some() {
+            sb.push_str(format!(" {}", self.word.clone().unwrap().clone()).as_str());
         }
+        if self.value.is_some() {
+            sb.push_str(format!(" {}", self.value.clone().unwrap().raw().clone()).as_str());
+        }
+        if self.count.is_some() {
+            sb.push_str(format!(" {}", self.count.unwrap().clone()).as_str());
+        }
+
+        return sb;
     }
 }
 
@@ -63,8 +88,8 @@ impl Program {
     pub fn new_mark(&mut self, name: String) {
         self.ops.push(Operation::new_word(MARK, name));
     }
-    pub fn new_push(&mut self, name: String) {
-        self.ops.push(Operation::new_word(PUSH, name));
+    pub fn new_push(&mut self, value: Value) {
+        self.ops.push(Operation::new_value(PUSH, value));
     }
     pub fn new_var(&mut self, name: String) {
         self.ops.push(Operation::new_word(VAR, name));
@@ -124,7 +149,7 @@ impl Program {
                 continue;
             }
 
-            if op.word == name {
+            if op.word == Some(name.clone()) {
                 self.op_idx = i - 1;
 
                 return;
