@@ -8,7 +8,7 @@ pub enum Value {
 
 impl Value {
     pub fn raw(&self) -> String {
-        match (self) {
+        match self {
             Value::Integer(a) => a.to_string(),
             Value::Float(a) => a.to_string(),
             Value::Boolean(a) => a.to_string(),
@@ -17,7 +17,7 @@ impl Value {
         }
     }
     pub fn to_integer(&self) -> Value {
-        match (self) {
+        match self {
             Value::Integer(a) => Value::Integer(a.clone()),
             Value::Float(a) => Value::Integer(*a as i64),
             Value::Boolean(a) => Value::Integer(*a as i64),
@@ -26,7 +26,7 @@ impl Value {
         }
     }
     pub fn to_float(&self) -> Value {
-        match (self) {
+        match self {
             Value::Integer(a) => Value::Float(*a as f64),
             Value::Float(a) => Value::Float(a.clone()),
             Value::Boolean(a) => Value::Float(*a as i64 as f64),
@@ -44,7 +44,7 @@ impl Value {
         }
     }
     pub fn to_string(&self) -> Value {
-        match (self) {
+        match self {
             Value::Integer(a) => Value::String(a.to_string()),
             Value::Float(a) => Value::String(a.to_string()),
             Value::Boolean(a) => Value::String(a.to_string()),
