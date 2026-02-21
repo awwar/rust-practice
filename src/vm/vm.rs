@@ -1,10 +1,10 @@
 use crate::program::{Operation, Program, Value};
 use crate::vm::operation::get_op_executable;
-use std::collections::{HashMap};
+use std::collections::HashMap;
 use std::time::Duration;
 use std::{env, thread};
 
-pub struct  Stack(Vec<Value>);
+pub struct Stack(Vec<Value>);
 
 impl Stack {
     pub fn new() -> Stack {
