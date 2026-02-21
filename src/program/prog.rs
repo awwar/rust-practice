@@ -1,5 +1,4 @@
 use crate::program::Value;
-use std::collections::LinkedList;
 
 type OperationName = &'static str;
 
