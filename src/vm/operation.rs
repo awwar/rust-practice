@@ -3,8 +3,8 @@ use crate::program::{Program, Value};
 use crate::vm::vm::{Memo, Stack};
 use std::collections::HashMap;
 
-pub fn get_op_executable() -> HashMap<String, fn(&mut Program, &mut Stack, &mut Memo) -> ()> {
-    let mut executables = HashMap::<String, fn(&mut Program, &mut Stack, &mut Memo) -> ()>::new();
+pub fn get_op_executable() -> HashMap<String, fn(&mut Program, &mut Stack, &mut Memo)> {
+    let mut executables = HashMap::<String, fn(&mut Program, &mut Stack, &mut Memo)>::new();
 
     executables.insert("JMP".to_string(), |pr: &mut Program, _: &mut Stack, _: &mut Memo| {
         let mark_name = pr.current().unwrap().word.clone().unwrap();
