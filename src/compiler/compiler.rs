@@ -18,12 +18,11 @@ impl Compiler {
 
         if node_type == NodeType::Operation {
             let binding = get_procedures();
-            let proc_name = node_copy.value.clone();
-            let proc = binding.get(&proc_name.as_str());
-            if proc.is_some() {
+            let proc_name = node_copy.value.as_str();
+            if let Some(procedure) = binding.get(&proc_name) {
                 let mut sub_compiler = Compiler::new();
 
-                proc.unwrap().compile(&mut sub_compiler, node_copy.clone()).unwrap();
+                procedure.compile(&mut sub_compiler, node_copy.clone())?;
 
                 self.program.merge(sub_compiler.program);
 

@@ -24,10 +24,10 @@ pub fn get_procedures() -> HashMap<&'static str, Box<dyn Procedure>> {
     procedures.insert("VAR", Box::new(var::Var {}));
     procedures.insert("RAND", Box::new(rand::Rand {}));
     procedures.insert("SUM", Box::new(sum::Sum {}));
-    procedures.insert("BOOL", Box::new(type_converter::TypeConverter { op: Value::to_bool, opname: "BOOL".to_string() }));
-    procedures.insert("FLOAT", Box::new(type_converter::TypeConverter { op: Value::to_float, opname: "FLOAT".to_string() }));
-    procedures.insert("STRING", Box::new(type_converter::TypeConverter { op: Value::to_string, opname: "STRING".to_string() }));
-    procedures.insert("VOID", Box::new(type_converter::TypeConverter { op: |_| { Value::Integer(0) }, opname: "VOID".to_string() }));
+    procedures.insert("BOOL", Box::new(type_converter::TypeConverter { op: Value::to_bool }));
+    procedures.insert("FLOAT", Box::new(type_converter::TypeConverter { op: Value::to_float }));
+    procedures.insert("STRING", Box::new(type_converter::TypeConverter { op: Value::to_string }));
+    procedures.insert("VOID", Box::new(type_converter::TypeConverter { op: |_| { Value::Integer(0) } }));
     procedures.insert("+", Box::new(expression::Expression { op: Value::add }));
     procedures.insert("-", Box::new(expression::Expression { op: Value::subtract }));
     procedures.insert("/", Box::new(expression::Expression { op: Value::divide }));

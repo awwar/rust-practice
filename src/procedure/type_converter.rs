@@ -4,7 +4,6 @@ use crate::vm::Stack;
 
 pub struct TypeConverter {
     pub op: fn(l: &Value) -> Value,
-    pub opname: String,
 }
 
 impl Procedure for TypeConverter {
