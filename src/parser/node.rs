@@ -64,13 +64,11 @@ impl Node {
     }
 
     pub fn new_number(value: String, token_position: usize) -> Self {
-        let parsed_value: String;
-
-        if value.contains('.') {
-            parsed_value = value.parse::<f64>().unwrap().to_string();
+        let parsed_value: String = if value.contains('.') {
+            value.parse::<f64>().unwrap().to_string()
         } else {
-            parsed_value = value.parse::<i64>().unwrap().to_string();
-        }
+            value.parse::<i64>().unwrap().to_string()
+        };
 
         Self {
             node_type: if value.contains('.') { NodeType::Float } else { NodeType::Integer },

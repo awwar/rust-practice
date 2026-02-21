@@ -17,7 +17,7 @@ fn main() {
     let input = fs::read_to_string("./.example/index.mp")
         .expect("Should have been able to read the file");
 
-    let stream = TokenStream::new(input).unwrap();
+    let stream = TokenStream::new(input);
 
     let mut parser = Parser::new_from_stream(stream);
 
@@ -35,7 +35,7 @@ fn main() {
 
     let now = Instant::now();
 
-    for _ in 0..100_000 {
+    for _ in 0..1_000_000 {
         execute(prog);
     }
 

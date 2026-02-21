@@ -15,7 +15,7 @@ pub struct TokenStream {
 }
 
 impl TokenStream {
-    pub fn new(input: String) -> Result<TokenStream, String> {
+    pub fn new(input: String) -> TokenStream {
         let chars: Vec<char> = input.chars().collect();
         let mut buffer = String::new();
         let mut last_char_idx: usize = 0;
@@ -29,11 +29,8 @@ impl TokenStream {
                 break;
             }
 
-            let candidate = specs.decide(char, buffer.clone());
-
-            if candidate.is_some() {
+            if let Some(spec) = specs.decide(char, buffer.clone()) {
                 specs.reset();
-                let spec = candidate.unwrap();
 
                 let token = Token::new(spec.token_name, buffer.clone(), last_char_idx);
 
@@ -50,7 +47,7 @@ impl TokenStream {
             buffer.push(char);
         }
 
-        Ok(TokenStream { tokens })
+        TokenStream { tokens }
     }
     pub fn get(&mut self, i: usize) -> Option<Token> {
         let candidate = self.tokens.get(i);
@@ -64,13 +61,8 @@ impl TokenStream {
     pub fn search_idx_of_closed_bracer(&mut self, mut current_position: usize) -> Option<usize> {
         let mut counts = 0;
 
-        loop {
-            let candidate = match self.tokens.get(current_position) {
-                Some(token) => token,
-                None => break,
-            };
-
-            match candidate.value.as_str() {
+        while let Some(token) = self.tokens.get(current_position) {
+            match token.value.as_str() {
                 "(" => counts += 1,
                 ")" => counts -= 1,
                 _ => {}
