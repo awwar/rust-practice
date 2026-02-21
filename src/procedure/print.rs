@@ -17,7 +17,7 @@ impl Procedure for Print {
             return Err(String::from("argument count must be 1"));
         }
 
-        let _ = stack.pop_back().unwrap();
+        let _ = stack.pop();
         //
         // println!("{}", first_operand.raw());
 

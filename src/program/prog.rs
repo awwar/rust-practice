@@ -70,7 +70,7 @@ impl Operation {
 
 pub struct Program {
     ops: Vec<Operation>,
-    trace: LinkedList<usize>,
+    trace: Vec<usize>,
     op_idx: usize,
 }
 
@@ -78,7 +78,7 @@ impl Program {
     pub fn new() -> Self {
         Program {
             ops: vec![],
-            trace: LinkedList::new(),
+            trace: Vec::with_capacity(255),
             op_idx: 0,
         }
     }
@@ -110,7 +110,7 @@ impl Program {
         self.op_idx > self.ops.len() - 1
     }
     pub fn finish_block(&mut self) {
-        self.op_idx = match self.trace.pop_front() {
+        self.op_idx = match self.trace.pop() {
             Some(idx) => idx,
             None => self.ops.len(),
         };
@@ -132,7 +132,7 @@ impl Program {
         self.ops.get(self.op_idx)
     }
     pub fn trace_back(&mut self) {
-        self.trace.push_front(self.op_idx + 1);
+        self.trace.push(self.op_idx + 1);
     }
     pub fn skip(&mut self, num: usize) {
         if num == 0 && self.op_idx > 0 {

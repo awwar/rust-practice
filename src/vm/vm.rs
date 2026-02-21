@@ -1,10 +1,26 @@
 use crate::program::{Operation, Program, Value};
 use crate::vm::operation::get_op_executable;
-use std::collections::{HashMap, LinkedList};
+use std::collections::{HashMap};
 use std::time::Duration;
 use std::{env, thread};
 
-pub type Stack = LinkedList<Value>;
+pub struct  Stack(Vec<Value>);
+
+impl Stack {
+    pub fn new() -> Stack {
+        Stack(Vec::with_capacity(255))
+    }
+    pub fn push(&mut self, value: Value) {
+        self.0.push(value);
+    }
+    pub fn pop(&mut self) -> Value {
+        self.0.pop().unwrap()
+    }
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+}
+
 pub type Memo = HashMap<String, Value>;
 
 pub fn execute(pr: &mut Program) {

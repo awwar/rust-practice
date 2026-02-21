@@ -10,15 +10,15 @@ impl Procedure for Sum {
             return Ok(());
         }
 
-        let mut result: Value = stack.pop_front().unwrap();
+        let mut result: Value = stack.pop();
 
         for _ in 1..argc {
-            let operand = stack.pop_front().unwrap();
+            let operand = stack.pop();
 
             result = operand.add(&result);
         }
 
-        stack.push_front(result);
+        stack.push(result);
 
         Ok(())
     }

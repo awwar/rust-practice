@@ -35,9 +35,9 @@ pub fn get_op_executable() -> HashMap<String, fn(&mut Program, &mut Stack, &mut 
         let raw_val = value.clone().raw();
 
         if raw_val.starts_with('$') {
-            st.push_front(mem[&raw_val].clone());
+            st.push(mem[&raw_val].clone());
         } else {
-            st.push_front(value);
+            st.push(value);
         }
     });
 
@@ -48,7 +48,7 @@ pub fn get_op_executable() -> HashMap<String, fn(&mut Program, &mut Stack, &mut 
     });
 
     executables.insert("CSKIP".to_string(), |pr: &mut Program, st: &mut Stack, _: &mut Memo| {
-        let operand = st.pop_front().unwrap();
+        let operand = st.pop();
 
         let condition_result = operand.to_bool().eq(&Value::Boolean(true));
 
@@ -64,7 +64,7 @@ pub fn get_op_executable() -> HashMap<String, fn(&mut Program, &mut Stack, &mut 
 
         let var_name = op.word.clone().unwrap();
 
-        let operand = st.pop_front().unwrap();
+        let operand = st.pop();
 
         assert!(!mem.contains_key(&var_name), "variable {var_name} already defined");
 

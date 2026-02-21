@@ -12,7 +12,6 @@ mod type_converter;
 pub use crate::procedure::procedure::Procedure;
 use crate::program::Value;
 use std::collections::HashMap;
-use std::string::ToString;
 
 pub fn get_procedures() -> HashMap<&'static str, Box<dyn Procedure>> {
     let mut procedures = HashMap::<&'static str, Box<dyn Procedure>>::new();

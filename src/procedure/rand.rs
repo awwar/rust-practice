@@ -13,7 +13,7 @@ impl Procedure for Rand {
 
         let mut rng = rand::rng();
 
-        stack.push_front(Value::Float(rng.random::<f64>()));
+        stack.push(Value::Float(rng.random::<f64>()));
 
         Ok(())
     }

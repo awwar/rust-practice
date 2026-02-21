@@ -8,14 +8,14 @@ pub struct Expression {
 
 impl Procedure for Expression {
     fn execute(&self, argc: usize, stack: &mut Stack) -> Result<(), String> {
-        assert!(argc == 2, "Procedure expects 2 arguments");
+        assert_eq!(argc, 2, "Procedure expects 2 arguments");
 
-        let second_operand = stack.pop_back().unwrap();
-        let first_operand = stack.pop_back().unwrap();
+        let second_operand = stack.pop();
+        let first_operand = stack.pop();
 
         let new_value = (self.op)(&first_operand, &second_operand);
 
-        stack.push_front(new_value);
+        stack.push(new_value);
 
         Ok(())
     }
