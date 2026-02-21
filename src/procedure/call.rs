@@ -8,20 +8,11 @@ pub struct Call {}
 impl Procedure for Call {
     fn parse(&self, token: Token, parser: &mut Parser) -> Result<Node, String> {
         // CALL #NAME () $RESULT
-        let link = match parser.subparse_flow_link() {
-            Ok(l) => l,
-            Err(e) => return Err(e)
-        };
+        let link = parser.subparse_flow_link()?;
 
-        let args = match parser.subparse_list_in_bracers(None) {
-            Ok(l) => l,
-            Err(e) => return Err(e)
-        };
+        let args = parser.subparse_list_in_bracers(None)?;
 
-        let variable = match parser.subparse_variable_name() {
-            Ok(l) => l,
-            Err(e) => return Err(e)
-        };
+        let variable = parser.subparse_variable_name()?;
 
         let mut params = vec![link, variable];
         params.extend(args);
@@ -33,7 +24,7 @@ impl Procedure for Call {
             sc.sub_compile(n.clone()).unwrap();
         }
 
-        sc.program.new_jmp(node.params.get(0).unwrap().value.clone());
+        sc.program.new_jmp(node.params.first().unwrap().value.clone());
         sc.program.new_var(node.params.get(1).unwrap().value.clone());
 
         Ok(())

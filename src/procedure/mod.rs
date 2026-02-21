@@ -37,5 +37,5 @@ pub fn get_procedures() -> HashMap<&'static str, Box<dyn Procedure>> {
     procedures.insert("<", Box::new(expression::Expression { op: Value::less }));
     procedures.insert(">", Box::new(expression::Expression { op: Value::more }));
 
-    return procedures;
+    procedures
 }

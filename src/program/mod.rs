@@ -1,6 +1,5 @@
-mod value;
 mod prog;
-mod value_v2;
+mod value;
 
 pub use crate::program::prog::{Operation, Program};
-pub use crate::program::value_v2::Value;
+pub use crate::program::value::Value;

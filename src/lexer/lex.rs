@@ -25,7 +25,7 @@ impl TokenStream {
         loop {
             let char = *chars.get(last_char_idx).unwrap_or(&'\0');
 
-            if buffer.len() == 0 && char == '\0' {
+            if buffer.is_empty() && char == '\0' {
                 break;
             }
 
@@ -114,17 +114,17 @@ impl Specs {
         Specs(Vec::from([
             Spec::new(TokenName::Whitespace, |c, _| c.is_whitespace() || c.is_control()),
             // 111 1 1.1 .1
-            Spec::new(TokenName::Number, |c, b| c.is_numeric() || (c == '.' && !b.contains('.')) || (c == '-' && b.len() == 0)),
+            Spec::new(TokenName::Number, |c, b| c.is_numeric() || (c == '.' && !b.contains('.')) || (c == '-' && b.is_empty())),
             // aaa 1aa a1a a_1a
             Spec::new(TokenName::Word, |c, _| { c.is_alphanumeric() || "#$_".contains(c) }),
             // + - * / =
-            Spec::new(TokenName::Operator, |c, b| b.len() == 0 && "+-*/<>^=&|".contains(c)),
+            Spec::new(TokenName::Operator, |c, b| b.is_empty() && "+-*/<>^=&|".contains(c)),
             // ( ) [ ]
-            Spec::new(TokenName::Bracket, |c, b| b.len() == 0 && "[]()".contains(c)),
-            Spec::new(TokenName::Comma, |c, b| b.len() == 0 && ",".contains(c)),
+            Spec::new(TokenName::Bracket, |c, b| b.is_empty() && "[]()".contains(c)),
+            Spec::new(TokenName::Comma, |c, b| b.is_empty() && ",".contains(c)),
             // "foo bar baz"
             Spec::new(TokenName::String, |c, b| {
-                !(b.len() > 1 && b.starts_with('"') && b.ends_with('"')) && (b.len() != 0 || c == '"')
+                !(b.len() > 1 && b.starts_with('"') && b.ends_with('"')) && (!b.is_empty() || c == '"')
             }),
         ]))
     }
@@ -148,7 +148,7 @@ impl Specs {
             return None;
         }
 
-        if candidate.is_none() || b.len() == 0 {
+        if candidate.is_none() || b.is_empty() {
             panic!("got unexpected character \"{}\"", c);
         }
 

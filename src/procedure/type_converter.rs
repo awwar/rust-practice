@@ -19,6 +19,6 @@ impl Procedure for TypeConverter {
 
         stack.push_front(new_value);
 
-        return Ok(());
+        Ok(())
     }
 }

@@ -8,15 +8,9 @@ pub struct If {}
 impl Procedure for If {
     fn parse(&self, token: Token, parser: &mut Parser) -> Result<Node, String> {
         // IF (rand() > 1) (#MORE, #LESS)
-        let expr = match parser.subparse_one_in_bracers() {
-            Ok(l) => l,
-            Err(e) => return Err(e)
-        };
+        let expr = parser.subparse_one_in_bracers()?;
 
-        let hash_links = match parser.subparse_list_in_bracers(Some(2)) {
-            Ok(l) => l,
-            Err(e) => return Err(e)
-        };
+        let hash_links = parser.subparse_list_in_bracers(Some(2))?;
 
         if !hash_links.iter().all(Node::is_flow_link) {
             return Err("if must have a 2 flow link".to_string());
@@ -28,7 +22,7 @@ impl Procedure for If {
         Ok(Node::new_operation(token.value, params, token.at))
     }
     fn compile(&self, sc: &mut Compiler, node: Node) -> Result<(), String> {
-        let expr = node.params.get(0).unwrap().clone();
+        let expr = node.params.first().unwrap().clone();
 
         sc.sub_compile(expr).unwrap();
 

@@ -52,19 +52,19 @@ impl Operation {
         }
     }
     pub fn to_string(&self) -> String {
-        let mut sb = format!("{}", self.name).to_string();
+        let mut sb = self.name.to_string();
 
         if self.word.is_some() {
-            sb.push_str(format!(" {}", self.word.clone().unwrap().clone()).as_str());
+            sb.push_str(format!(" {}", self.word.clone().unwrap()).as_str());
         }
         if self.value.is_some() {
-            sb.push_str(format!(" {}", self.value.clone().unwrap().raw().clone()).as_str());
+            sb.push_str(format!(" {}", self.value.clone().unwrap().raw()).as_str());
         }
         if self.count.is_some() {
             sb.push_str(format!(" {}", self.count.unwrap().clone()).as_str());
         }
 
-        return sb;
+        sb
     }
 }
 

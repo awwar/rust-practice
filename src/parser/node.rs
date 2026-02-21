@@ -22,7 +22,7 @@ pub struct Node {
     pub token_position: usize,
 }
 
-const OPERATION_PRIORITY: [&'static str; 9] = ["+", "-", "*", "/", ">", "<", "=", "^", "."];
+const OPERATION_PRIORITY: [&str; 9] = ["+", "-", "*", "/", ">", "<", "=", "^", "."];
 
 impl Node {
     pub fn new_program(params: Vec<Self>) -> Self {
@@ -136,7 +136,7 @@ impl Node {
     pub fn clone_with_priority(self, priority: usize) -> Self {
         let mut self_clone = self.clone();
         self_clone.priority = priority;
-        return self_clone;
+        self_clone
     }
 
     pub fn get_priority(&self) -> usize {

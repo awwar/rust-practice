@@ -8,10 +8,7 @@ pub struct Print {}
 impl Procedure for Print {
     fn parse(&self, token: Token, parser: &mut Parser) -> Result<Node, String> {
         // PRINT (expression)
-        let expr = match parser.subparse_one_in_bracers() {
-            Ok(l) => l,
-            Err(e) => return Err(e)
-        };
+        let expr = parser.subparse_one_in_bracers()?;
 
         Ok(Node::new_operation(token.value, vec![expr], token.at))
     }

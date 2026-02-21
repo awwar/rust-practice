@@ -61,16 +61,10 @@ impl Parser {
             return Err(self.error(next_token.at, "word token uses only in function context"));
         }
 
-        let args = match self.subparse_list_in_bracers(None) {
-            Err(e) => return Err(e),
-            Ok(a) => a
-        };
+        let args = self.subparse_list_in_bracers(None)?;
 
 
-        let return_param = match self.subparse_word() {
-            Err(err) => return Err(err),
-            Ok(node) => node
-        };
+        let return_param = self.subparse_word()?;
 
         list.extend(args);
         list.push(return_param);
@@ -85,10 +79,7 @@ impl Parser {
                 break;
             }
 
-            let node = match self.subparse_node() {
-                Err(err) => return Err(err),
-                Ok(node) => node
-            };
+            let node = self.subparse_node()?;
 
             list.push(node);
         }
@@ -125,10 +116,7 @@ impl Parser {
     }
 
     pub fn subparse_one_in_bracers(&mut self) -> Result<Node, String> {
-        let sub_nodes = match self.subparse_list_in_bracers(Some(1)) {
-            Err(e) => return Err(e),
-            Ok(a) => a
-        };
+        let sub_nodes = self.subparse_list_in_bracers(Some(1))?;
 
         if sub_nodes.len() != 1 {
             return Err(self.error(self.current_position, "expected 1 sub expression"));
@@ -182,10 +170,7 @@ impl Parser {
         if self.current_position != end_bracer_position - 1 {
             let mut sub_parser = Parser::new(self.stream.clone(), self.current_position + 1, end_bracer_position - 1);
 
-            sub_nodes = match sub_parser.subparse_expressions() {
-                Err(err) => return Err(err),
-                Ok(sn) => sn
-            };
+            sub_nodes = sub_parser.subparse_expressions()?;
         }
 
         if length.is_some() && sub_nodes.len() != length.unwrap() {
@@ -322,7 +307,7 @@ impl Parser {
             }
         }
 
-        return list;
+        list
     }
 }
 
@@ -344,7 +329,7 @@ fn math_operations(mut list: Vec<Node>, pointer: usize) -> Option<Vec<Node>> {
 
     list.splice(pointer - 1..pointer + 2, to);
 
-    return Some(list);
+    Some(list)
 }
 
 fn function_call(mut list: Vec<Node>, pointer: usize) -> Option<Vec<Node>> {
@@ -365,7 +350,7 @@ fn function_call(mut list: Vec<Node>, pointer: usize) -> Option<Vec<Node>> {
 
     list.splice(pointer - 1..pointer + 2, to);
 
-    return Some(list);
+    Some(list)
 }
 
 

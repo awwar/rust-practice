@@ -51,16 +51,13 @@ impl Compiler {
                 if child.params.len() != 1 {
                     return Err(format!("Invalid number of flow arguments: {}", child.params.len()));
                 }
-                self.program.new_var(child.params.get(0).unwrap().value.clone());
+                self.program.new_var(child.params.first().unwrap().value.clone());
             }
         }
 
         for child in node_copy.params.iter().skip(from_param) {
             let child_copy = child.clone();
-            match self.compile(child_copy) {
-                Err(e) => return Err(e),
-                _ => {}
-            }
+            self.compile(child_copy)?
         }
 
         if node_type == NodeType::Variable {

@@ -18,7 +18,7 @@ pub fn get_op_executable() -> HashMap<String, fn(&mut Program, &mut Stack, &mut 
         let procedures = get_procedures();
         let proc_name = op.word.clone().unwrap();
         let proc = procedures.get(&proc_name.as_str()).unwrap();
-        let argc = op.count.clone().unwrap();
+        let argc = op.count.unwrap();
 
         proc.execute(argc, st).unwrap();
     });
@@ -42,7 +42,7 @@ pub fn get_op_executable() -> HashMap<String, fn(&mut Program, &mut Stack, &mut 
     });
 
     executables.insert("SKIP".to_string(), |pr: &mut Program, _: &mut Stack, _: &mut Memo| {
-        let skip = pr.current().unwrap().count.unwrap().clone();
+        let skip = pr.current().unwrap().count.unwrap();
 
         pr.skip(skip);
     });
@@ -52,13 +52,10 @@ pub fn get_op_executable() -> HashMap<String, fn(&mut Program, &mut Stack, &mut 
 
         let condition_result = operand.to_bool().eq(&Value::Boolean(true));
 
-        match condition_result {
-            Value::Boolean(true) => {
-                let skip = pr.current().unwrap().count.unwrap().clone();
+        if let Value::Boolean(true) = condition_result {
+            let skip = pr.current().unwrap().count.unwrap();
 
-                pr.skip(skip);
-            }
-            _ => {}
+            pr.skip(skip);
         }
     });
 
@@ -76,5 +73,5 @@ pub fn get_op_executable() -> HashMap<String, fn(&mut Program, &mut Stack, &mut 
         mem.insert(var_name, operand);
     });
 
-    return executables;
+    executables
 }
