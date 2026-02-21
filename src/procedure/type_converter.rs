@@ -8,9 +8,7 @@ pub struct TypeConverter {
 
 impl Procedure for TypeConverter {
     fn execute(&self, argc: usize, stack: &mut Stack) -> Result<(), String> {
-        if argc != 1 {
-            panic!("Procedure expects 1 arguments");
-        }
+        assert!(argc == 1, "Procedure expects 1 arguments");
 
         let first_operand = stack.pop_back().unwrap();
 

@@ -132,18 +132,18 @@ impl Program {
         self.ops.get(self.op_idx)
     }
     pub fn trace_back(&mut self) {
-        self.trace.push_front(self.op_idx + 1)
+        self.trace.push_front(self.op_idx + 1);
     }
     pub fn skip(&mut self, num: usize) {
         if num == 0 && self.op_idx > 0 {
             self.op_idx -= 1;
             return;
         }
-        self.op_idx += num
+        self.op_idx += num;
     }
     pub fn jump_to_mark(&mut self, name: String) {
         let mut i = 0;
-        for op in self.ops.iter() {
+        for op in &self.ops {
             i += 1;
             if op.name.ne(MARK) {
                 continue;
@@ -156,7 +156,7 @@ impl Program {
             }
         }
 
-        panic!("segmentation fault, {} mark name not found", name)
+        panic!("segmentation fault, {name} mark name not found")
     }
     pub fn jump_to_program_begin(&mut self) {
         self.jump_to_mark("#MAIN".to_string());
@@ -166,7 +166,7 @@ impl Program {
 
         let mut i = 0;
 
-        for op in self.ops.iter() {
+        for op in &self.ops {
             string.push_str(format!("{}: {}\n", i, op.to_string()).as_str());
             i += 1;
         }

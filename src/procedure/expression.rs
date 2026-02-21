@@ -8,9 +8,7 @@ pub struct Expression {
 
 impl Procedure for Expression {
     fn execute(&self, argc: usize, stack: &mut Stack) -> Result<(), String> {
-        if argc != 2 {
-            panic!("Procedure expects 2 arguments");
-        }
+        assert!(argc == 2, "Procedure expects 2 arguments");
 
         let second_operand = stack.pop_back().unwrap();
         let first_operand = stack.pop_back().unwrap();

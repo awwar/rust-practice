@@ -36,7 +36,7 @@ fn main() {
     let now = Instant::now();
 
     for _ in 0..100_000 {
-        execute(prog)
+        execute(prog);
     }
 
     println!("{}ms", now.elapsed().as_millis());

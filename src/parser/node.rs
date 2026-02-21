@@ -57,7 +57,7 @@ impl Node {
         };
 
         if !node.is_mathematical_operation() {
-            node.priority = 4
+            node.priority = 4;
         }
 
         node
@@ -66,14 +66,14 @@ impl Node {
     pub fn new_number(value: String, token_position: usize) -> Self {
         let parsed_value: String;
 
-        if value.contains(".") {
+        if value.contains('.') {
             parsed_value = value.parse::<f64>().unwrap().to_string();
         } else {
             parsed_value = value.parse::<i64>().unwrap().to_string();
         }
 
         Self {
-            node_type: if value.contains(".") { NodeType::Float } else { NodeType::Integer },
+            node_type: if value.contains('.') { NodeType::Float } else { NodeType::Integer },
             value: parsed_value,
             params: vec![],
             priority: 4,
@@ -123,11 +123,11 @@ impl Node {
     pub fn format(&self, indent: i32) -> String {
         let string_indent = " ".repeat((indent * 4) as usize);
 
-        let mut branches = "".to_string();
+        let mut branches = String::new();
 
-        for n in self.params.iter() {
+        for n in &self.params {
             let substr: String = n.clone().format(indent + 1);
-            branches += format!("{}└── {}", string_indent, substr).as_str();
+            branches += format!("{string_indent}└── {substr}").as_str();
         }
 
         format!("{}\n{}", self.value, branches)
@@ -144,7 +144,7 @@ impl Node {
     }
 
     pub fn deprioritize(&mut self) {
-        self.priority = 0
+        self.priority = 0;
     }
 
     pub fn is_mathematical_operation(&self) -> bool {

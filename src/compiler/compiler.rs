@@ -41,7 +41,7 @@ impl Compiler {
         if node_type == NodeType::FlowDeclaration {
             self.program.new_mark(node_copy.value.clone());
 
-            for child in node_copy.params.iter() {
+            for child in &node_copy.params {
                 from_param += 1;
                 if child.node_type == NodeType::Constant {
                     break;
@@ -56,7 +56,7 @@ impl Compiler {
 
         for child in node_copy.params.iter().skip(from_param) {
             let child_copy = child.clone();
-            self.compile(child_copy)?
+            self.compile(child_copy)?;
         }
 
         if node_type == NodeType::Variable {

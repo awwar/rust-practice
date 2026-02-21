@@ -11,9 +11,9 @@ pub struct Parser {
 impl Parser {
     pub fn new(stream: TokenStream, current_position: usize, last_position: usize) -> Self {
         Parser {
-            stream,
             last_position,
             current_position,
+            stream,
         }
     }
 
@@ -261,7 +261,7 @@ impl Parser {
     }
 
     fn error(&self, position: usize, message: &str) -> String {
-        crate::util::new_error(position, "".to_string(), message)
+        crate::util::new_error(position, String::new(), message)
     }
 
     fn prioritize(&self, input_list: Vec<Node>) -> Vec<Node> {
@@ -271,17 +271,16 @@ impl Parser {
         let mut list = input_list.clone();
 
         loop {
-            let current_node = &mut match list.get(pointer) {
-                Some(node) => node.clone(),
-                None => {
-                    pointer = 0;
-                    if target_priority == 0 {
-                        break;
-                    }
-                    target_priority -= 1;
-
-                    continue;
+            let current_node = &mut if let Some(node) = list.get(pointer) {
+                node.clone()
+            } else {
+                pointer = 0;
+                if target_priority == 0 {
+                    break;
                 }
+                target_priority -= 1;
+
+                continue;
             };
             pointer += 1;
 

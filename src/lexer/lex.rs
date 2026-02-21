@@ -80,7 +80,7 @@ impl TokenStream {
                 return Some(current_position);
             }
 
-            current_position += 1
+            current_position += 1;
         }
 
         None
@@ -132,7 +132,7 @@ impl Specs {
         let mut candidate: Option<Spec> = None;
         let mut count = 0;
 
-        for spec in self.0.iter_mut() {
+        for spec in &mut self.0 {
             if candidate.is_none() && spec.accepted {
                 candidate = Some(spec.clone());
             }
@@ -148,15 +148,13 @@ impl Specs {
             return None;
         }
 
-        if candidate.is_none() || b.is_empty() {
-            panic!("got unexpected character \"{}\"", c);
-        }
+        assert!(!(candidate.is_none() || b.is_empty()), "got unexpected character \"{c}\"");
 
         candidate
     }
     pub fn reset(&mut self) {
-        for spec in self.0.iter_mut() {
-            spec.reset()
+        for spec in &mut self.0 {
+            spec.reset();
         }
     }
 }
@@ -181,7 +179,7 @@ impl Spec {
             return;
         }
 
-        self.accepted = (self.when)(c, b)
+        self.accepted = (self.when)(c, b);
     }
     fn reset(&mut self) {
         self.accepted = true;

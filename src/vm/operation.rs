@@ -34,7 +34,7 @@ pub fn get_op_executable() -> HashMap<String, fn(&mut Program, &mut Stack, &mut 
         let value = op.value.clone().unwrap().clone();
         let raw_val = value.clone().raw();
 
-        if raw_val.starts_with("$") {
+        if raw_val.starts_with('$') {
             st.push_front(mem[&raw_val].clone());
         } else {
             st.push_front(value);
@@ -66,9 +66,7 @@ pub fn get_op_executable() -> HashMap<String, fn(&mut Program, &mut Stack, &mut 
 
         let operand = st.pop_front().unwrap();
 
-        if mem.contains_key(&var_name) {
-            panic!("variable {} already defined", var_name);
-        }
+        assert!(!mem.contains_key(&var_name), "variable {var_name} already defined");
 
         mem.insert(var_name, operand);
     });
