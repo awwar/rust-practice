@@ -9,7 +9,7 @@ mod vm;
 use crate::compiler::Compiler;
 use crate::lexer::TokenStream;
 use crate::parser::Parser;
-use crate::vm::execute;
+use crate::vm::{VM};
 use std::fs;
 use std::time::Instant;
 
@@ -33,10 +33,11 @@ fn main() {
 
     println!("{}", prog.to_string());
 
+    let vm = VM::new();
     let now = Instant::now();
 
     for _ in 0..1_000_000 {
-        execute(prog);
+        vm.execute(prog);
     }
 
     println!("{}ms", now.elapsed().as_millis());

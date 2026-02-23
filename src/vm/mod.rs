@@ -1,4 +1,4 @@
 mod vm;
 mod operation;
 
-pub use crate::vm::vm::{execute, Stack};
+pub use crate::vm::vm::{VM, Stack};

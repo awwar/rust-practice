@@ -21,7 +21,7 @@ pub fn get_procedures() -> HashMap<&'static str, Box<dyn Procedure>> {
     procedures.insert("PRINT", Box::new(print::Print {}));
     procedures.insert("RETURN", Box::new(r#return::Return {}));
     procedures.insert("VAR", Box::new(var::Var {}));
-    procedures.insert("RAND", Box::new(rand::Rand {}));
+    procedures.insert("RAND", Box::new(rand::Rand::new()));
     procedures.insert("SUM", Box::new(sum::Sum {}));
     procedures.insert("BOOL", Box::new(type_converter::TypeConverter { op: Value::to_bool }));
     procedures.insert("FLOAT", Box::new(type_converter::TypeConverter { op: Value::to_float }));

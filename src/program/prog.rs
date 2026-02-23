@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+use crate::procedure::{get_procedures, Procedure};
 use crate::program::Value;
 
 type OperationName = &'static str;
@@ -71,15 +73,21 @@ pub struct Program {
     ops: Vec<Operation>,
     trace: Vec<usize>,
     op_idx: usize,
+    procedures: HashMap<&'static str, Box<dyn Procedure>>
 }
 
 impl Program {
     pub fn new() -> Self {
+        let procedures = get_procedures();
         Program {
             ops: vec![],
             trace: Vec::with_capacity(255),
             op_idx: 0,
+            procedures
         }
+    }
+    pub fn get_procedures(&self) -> &HashMap<&'static str, Box<dyn Procedure>> {
+        &self.procedures
     }
     pub fn merge(&mut self, prog: Program) {
         self.ops.extend(prog.ops);
@@ -123,7 +131,7 @@ impl Program {
 
         self.finish_block();
     }
-    pub fn current(&mut self) -> Option<&Operation> {
+    pub fn current(&self) -> Option<&Operation> {
         if self.is_end() {
             return None;
         }

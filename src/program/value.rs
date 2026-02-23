@@ -13,7 +13,7 @@ impl Value {
             Value::Float(a) => a.to_string(),
             Value::Boolean(a) => a.to_string(),
             Value::String(a) => a.clone(),
-            _ => panic!("unable to int({self:?})")
+            // _ => panic!("unable to int({self:?})")
         }
     }
     pub fn to_integer(&self) -> Value {
@@ -22,7 +22,7 @@ impl Value {
             Value::Float(a) => Value::Integer(*a as i64),
             Value::Boolean(a) => Value::Integer(i64::from(*a)),
             Value::String(a) => Value::Integer(a.parse::<i64>().unwrap()),
-            _ => panic!("unable to int({self:?})")
+            // _ => panic!("unable to int({self:?})")
         }
     }
     pub fn to_float(&self) -> Value {
@@ -31,7 +31,7 @@ impl Value {
             Value::Float(a) => Value::Float(*a),
             Value::Boolean(a) => Value::Float(i64::from(*a) as f64),
             Value::String(a) => Value::Float(a.parse::<f64>().unwrap()),
-            _ => panic!("unable to float({self:?})")
+            // _ => panic!("unable to float({self:?})")
         }
     }
     pub fn to_bool(&self) -> Value {
@@ -40,7 +40,7 @@ impl Value {
             Value::Float(a) => Value::Boolean(a > &0.0),
             Value::Boolean(a) => Value::Boolean(*a),
             Value::String(a) => Value::Boolean(!a.is_empty()),
-            _ => panic!("unable to bool({self:?})")
+            // _ => panic!("unable to bool({self:?})")
         }
     }
     pub fn to_string(&self) -> Value {
@@ -49,7 +49,7 @@ impl Value {
             Value::Float(a) => Value::String(a.to_string()),
             Value::Boolean(a) => Value::String(a.to_string()),
             Value::String(a) => Value::String(a.clone()),
-            _ => panic!("unable to string({self:?})")
+            // _ => panic!("unable to string({self:?})")
         }
     }
     pub fn add(&self, r: &Self) -> Value {

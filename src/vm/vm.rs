@@ -1,5 +1,5 @@
 use crate::program::{Operation, Program, Value};
-use crate::vm::operation::get_op_executable;
+use crate::vm::operation::{get_op_executable, Executable};
 use std::collections::HashMap;
 use std::time::Duration;
 use std::{env, thread};
@@ -23,31 +23,43 @@ impl Stack {
 
 pub type Memo = HashMap<String, Value>;
 
-pub fn execute(pr: &mut Program) {
-    let stack = &mut Stack::new();
-    let memo = &mut Memo::new();
+pub struct VM {
+    operations: HashMap<String, Executable>,
+}
 
-    pr.jump_to_program_begin();
+impl VM {
+    pub fn new() -> VM {
+        VM {
+            operations: get_op_executable(),
+        }
+    }
+    pub fn execute(&self, pr: &mut Program) {
+        let stack = &mut Stack::new();
+        let memo = &mut Memo::new();
 
-    let op_executable_map = get_op_executable();
-    loop {
-        pr.next();
+        pr.jump_to_program_begin();
 
-        let op = match pr.current() {
-            None => break,
-            Some(o) => o,
-        };
+        loop {
+            pr.next();
 
-        let op_executable = match op_executable_map.get(op.name) {
-            None => panic!("unknown procedure: {}", op.name),
-            Some(p) => p,
-        };
+            let op = match pr.current() {
+                None => break,
+                Some(o) => o,
+            };
 
-        debug(op, stack);
+            let op_executable = match self.operations.get(op.name) {
+                None => panic!("unknown procedure: {}", op.name),
+                Some(p) => p,
+            };
 
-        op_executable(pr, stack, memo);
+            // debug(op, stack);
+
+            op_executable(pr, stack, memo);
+        }
     }
 }
+
+
 
 fn debug(op: &Operation, stack: &Stack) {
     let debug = match env::var("DEBUG") {

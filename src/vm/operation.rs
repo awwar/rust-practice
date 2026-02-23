@@ -1,75 +1,93 @@
-use crate::procedure::get_procedures;
 use crate::program::{Program, Value};
 use crate::vm::vm::{Memo, Stack};
 use std::collections::HashMap;
+use crate::procedure::Procedure;
 
-pub fn get_op_executable() -> HashMap<String, fn(&mut Program, &mut Stack, &mut Memo)> {
-    let mut executables = HashMap::<String, fn(&mut Program, &mut Stack, &mut Memo)>::new();
+pub type Executable = fn(&mut Program, &mut Stack, &mut Memo);
 
-    executables.insert("JMP".to_string(), |pr: &mut Program, _: &mut Stack, _: &mut Memo| {
-        let mark_name = pr.current().unwrap().word.clone().unwrap();
-        pr.trace_back();
-        pr.jump_to_mark(mark_name);
-    });
+pub fn jmp(pr: &mut Program, _: &mut Stack, _: &mut Memo) {
+    let mark_name = pr.current().unwrap().word.clone().unwrap();
+    pr.trace_back();
+    pr.jump_to_mark(mark_name);
+}
 
-    executables.insert("EXEC".to_string(), |pr: &mut Program, st: &mut Stack, _: &mut Memo| {
-        let op = pr.current().unwrap();
+pub fn exec(pr: &mut Program, st: &mut Stack, _: &mut Memo) {
+    let op = pr.current().unwrap();
 
-        let procedures = get_procedures();
-        let proc_name = op.word.clone().unwrap();
-        let proc = procedures.get(&proc_name.as_str()).unwrap();
-        let argc = op.count.unwrap();
+    let binding = op.word.clone().unwrap();
+    let proc = pr.get_procedures().get(&binding.as_str()).unwrap();
+    let argc = op.count.unwrap();
 
-        proc.execute(argc, st).unwrap();
-    });
+    proc.execute(argc, st).unwrap();
+}
 
-    executables.insert("MARK".to_string(), |pr: &mut Program, _: &mut Stack, _: &mut Memo| {
-        pr.finish_block();
-        pr.skip(0);
-    });
+pub fn mark(pr: &mut Program, _: &mut Stack, _: &mut Memo) {
+    pr.finish_block();
+    pr.skip(0);
+}
 
-    executables.insert("PUSH".to_string(), |pr: &mut Program, st: &mut Stack, mem: &mut Memo| {
-        let op = pr.current().unwrap();
+pub fn push(pr: &mut Program, st: &mut Stack, mem: &mut Memo) {
+    let op = pr.current().unwrap();
 
-        let value = op.value.clone().unwrap().clone();
-        let raw_val = value.clone().raw();
+    let value = op.value.clone().unwrap().clone();
+    let raw_val = value.clone().raw();
 
-        if raw_val.starts_with('$') {
-            st.push(mem[&raw_val].clone());
-        } else {
-            st.push(value);
-        }
-    });
+    if raw_val.starts_with('$') {
+        st.push(mem[&raw_val].clone());
+    } else {
+        st.push(value);
+    }
+}
 
-    executables.insert("SKIP".to_string(), |pr: &mut Program, _: &mut Stack, _: &mut Memo| {
+pub fn skip(pr: &mut Program, _: &mut Stack, _: &mut Memo) {
+    let skip = pr.current().unwrap().count.unwrap();
+
+    pr.skip(skip);
+}
+
+pub fn cskip(pr: &mut Program, st: &mut Stack, _: &mut Memo) {
+    let operand = st.pop();
+
+    let condition_result = operand.to_bool().eq(&Value::Boolean(true));
+
+    if let Value::Boolean(true) = condition_result {
         let skip = pr.current().unwrap().count.unwrap();
 
         pr.skip(skip);
-    });
+    }
+}
 
-    executables.insert("CSKIP".to_string(), |pr: &mut Program, st: &mut Stack, _: &mut Memo| {
-        let operand = st.pop();
+pub fn var(pr: &mut Program, st: &mut Stack, mem: &mut Memo) {
+    let op = pr.current().unwrap();
 
-        let condition_result = operand.to_bool().eq(&Value::Boolean(true));
+    let var_name = op.word.clone().unwrap();
 
-        if let Value::Boolean(true) = condition_result {
-            let skip = pr.current().unwrap().count.unwrap();
+    let operand = st.pop();
 
-            pr.skip(skip);
-        }
-    });
+    assert!(
+        !mem.contains_key(&var_name),
+        "variable {var_name} already defined"
+    );
 
-    executables.insert("VAR".to_string(), |pr: &mut Program, st: &mut Stack, mem: &mut Memo| {
-        let op = pr.current().unwrap();
+    mem.insert(var_name, operand);
+}
 
-        let var_name = op.word.clone().unwrap();
+pub fn get_op_executable() -> HashMap<String, Executable> {
+    let mut executables = HashMap::<String, Executable>::new();
 
-        let operand = st.pop();
+    executables.insert("JMP".to_string(), jmp);
 
-        assert!(!mem.contains_key(&var_name), "variable {var_name} already defined");
+    executables.insert("EXEC".to_string(), exec);
 
-        mem.insert(var_name, operand);
-    });
+    executables.insert("MARK".to_string(), mark);
+
+    executables.insert("PUSH".to_string(), push);
+
+    executables.insert("SKIP".to_string(), skip);
+
+    executables.insert("CSKIP".to_string(), cskip);
+
+    executables.insert("VAR".to_string(), var);
 
     executables
 }
