@@ -13,7 +13,7 @@ pub use crate::procedure::procedure::Procedure;
 use crate::program::Value;
 
 pub fn get_procedures(name: &str) -> Box<dyn Procedure> {
-    return match name {
+    match name {
         "CALL" => Box::new(call::Call {}),
         "IF" => Box::new(r#if::If {}),
         "PRINT" => Box::new(print::Print {}),
@@ -43,6 +43,6 @@ pub fn get_procedures(name: &str) -> Box<dyn Procedure> {
         "=" => Box::new(expression::Expression { op: Value::eq }),
         "<" => Box::new(expression::Expression { op: Value::less }),
         ">" => Box::new(expression::Expression { op: Value::more }),
-        _ => panic!("Unknown procedure {}", name),
-    };
+        _ => panic!("Unknown procedure {name}"),
+    }
 }

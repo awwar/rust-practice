@@ -1,5 +1,4 @@
-use std::collections::HashMap;
-use crate::procedure::{get_procedures, Procedure};
+use std::collections::BTreeMap;
 use crate::program::Value;
 
 type OperationName = &'static str;
@@ -71,6 +70,7 @@ impl Operation {
 
 pub struct Program {
     ops: Vec<Operation>,
+    marks: BTreeMap<String, usize>,
     trace: Vec<usize>,
     op_idx: usize
 }
@@ -80,6 +80,7 @@ impl Program {
         Program {
             ops: vec![],
             trace: Vec::with_capacity(255),
+            marks: BTreeMap::new(),
             op_idx: 0
         }
     }
@@ -87,7 +88,9 @@ impl Program {
         self.ops.extend(prog.ops);
     }
     pub fn new_mark(&mut self, name: String) {
-        self.ops.push(Operation::new_word(MARK, name));
+        self.ops.push(Operation::new_word(MARK, name.clone()));
+
+        self.marks.insert(name, self.ops.len() - 1);
     }
     pub fn new_push(&mut self, value: Value) {
         self.ops.push(Operation::new_value(PUSH, value));
@@ -143,21 +146,15 @@ impl Program {
         self.op_idx += num;
     }
     pub fn jump_to_mark(&mut self, name: String) {
-        let mut i = 0;
-        for op in &self.ops {
-            i += 1;
-            if op.name.ne(MARK) {
-                continue;
-            }
+        let name_clone = name.clone();
 
-            if op.word == Some(name.clone()) {
-                self.op_idx = i - 1;
+        if let Some(op_id) = self.marks.get(&name_clone) {
+            self.op_idx = *op_id;
 
-                return;
-            }
+            return;
         }
 
-        panic!("segmentation fault, {name} mark name not found")
+        panic!("segmentation fault, {name_clone} mark name not found")
     }
     pub fn jump_to_program_begin(&mut self) {
         self.jump_to_mark("#MAIN".to_string());

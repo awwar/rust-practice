@@ -1,6 +1,6 @@
 use crate::program::{Operation, Program, Value};
 use crate::vm::operation::{get_op_executable};
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 use std::time::Duration;
 use std::{env, thread};
 
@@ -24,11 +24,15 @@ impl Stack {
 pub type Memo = BTreeMap<String, Value>;
 
 pub struct VM {
+    debug: bool,
 }
 
 impl VM {
     pub fn new() -> VM {
+        let debug = env::var("DEBUG").unwrap_or_else(|_e| "0".to_string());
+
         VM {
+            debug: debug.eq("1") || debug.eq("true")
         }
     }
     pub fn execute(&self, pr: &mut Program) {
@@ -40,28 +44,24 @@ impl VM {
         loop {
             pr.next();
 
-            let op = match pr.current() {
-                None => break,
-                Some(o) => o,
-            };
+            if let Some(op) = pr.current() {
+                self.debug(op, stack);
 
-            get_op_executable(op.name, pr, stack, memo);
+                get_op_executable(op.name)(pr, stack, memo);
+
+                continue;
+            }
+
+            break;
         }
     }
-}
 
+    fn debug(&self, op: &Operation, stack: &Stack) {
+        if !self.debug {
+            return;
+        }
 
-
-fn debug(op: &Operation, stack: &Stack) {
-    let debug = match env::var("DEBUG") {
-        Ok(val) => val,
-        Err(_e) => return,
-    };
-
-    if debug.ne("1") && debug.ne("true") {
-        return;
+        thread::sleep(Duration::from_millis(500));
+        println!("> {} {}", op.to_string(), stack.len());
     }
-
-    thread::sleep(Duration::from_millis(500));
-    println!("> {} {}", op.to_string(), stack.len());
 }

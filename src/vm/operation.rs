@@ -1,6 +1,6 @@
+use crate::procedure::{get_procedures};
 use crate::program::{Program, Value};
 use crate::vm::vm::{Memo, Stack};
-use crate::procedure::{get_procedures, Procedure};
 
 pub type Executable = fn(&mut Program, &mut Stack, &mut Memo);
 
@@ -14,7 +14,7 @@ pub fn exec(pr: &mut Program, st: &mut Stack, _: &mut Memo) {
     let op = pr.current().unwrap();
 
     let binding = op.word.clone().unwrap();
-    let proc = get_procedures(&binding.as_str());
+    let proc = get_procedures(binding.as_str());
     let argc = op.count.unwrap();
 
     proc.execute(argc, st).unwrap();
@@ -71,15 +71,15 @@ pub fn var(pr: &mut Program, st: &mut Stack, mem: &mut Memo) {
     mem.insert(var_name, operand);
 }
 
-pub fn get_op_executable(name: &str, pr: &mut Program, st: &mut Stack, mem: &mut Memo) {
-    return match name {
-        "JMP" =>  jmp(pr, st, mem),
-        "EXEC" => exec(pr, st, mem),
-        "MARK" => mark(pr, st, mem),
-        "PUSH" => push(pr, st, mem),
-        "SKIP" => skip(pr, st, mem),
-        "CSKIP" => cskip(pr, st, mem),
-        "VAR" => var(pr, st, mem),
-        _ => panic!("Unknown variable name")
+pub fn get_op_executable(name: &str) -> Executable {
+    match name {
+        "JMP" => jmp,
+        "EXEC" => exec,
+        "MARK" => mark,
+        "PUSH" => push,
+        "SKIP" => skip,
+        "CSKIP" => cskip,
+        "VAR" => var,
+        _ => panic!("Unknown variable name"),
     }
 }

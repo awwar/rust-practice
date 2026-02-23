@@ -18,7 +18,7 @@ impl Compiler {
 
         if node_type == NodeType::Operation {
             let proc_name = node_copy.value.as_str();
-            let procedure = get_procedures(&proc_name);
+            let procedure = get_procedures(proc_name);
             let mut sub_compiler = Compiler::new();
 
             procedure.compile(&mut sub_compiler, node_copy.clone())?;

@@ -139,7 +139,7 @@ impl Parser {
         let proc_name = token.value.to_uppercase();
         let proc = get_procedures(&proc_name);
 
-        return proc.parse(token.clone(), self);
+        proc.parse(token.clone(), self)
     }
 
     pub fn subparse_list_in_bracers(&mut self, length: Option<usize>) -> Result<Vec<Node>, String> {
