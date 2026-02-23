@@ -1,7 +1,6 @@
 use crate::program::{Program, Value};
 use crate::vm::vm::{Memo, Stack};
-use std::collections::HashMap;
-use crate::procedure::Procedure;
+use crate::procedure::{get_procedures, Procedure};
 
 pub type Executable = fn(&mut Program, &mut Stack, &mut Memo);
 
@@ -15,7 +14,7 @@ pub fn exec(pr: &mut Program, st: &mut Stack, _: &mut Memo) {
     let op = pr.current().unwrap();
 
     let binding = op.word.clone().unwrap();
-    let proc = pr.get_procedures().get(&binding.as_str()).unwrap();
+    let proc = get_procedures(&binding.as_str());
     let argc = op.count.unwrap();
 
     proc.execute(argc, st).unwrap();
@@ -30,10 +29,10 @@ pub fn push(pr: &mut Program, st: &mut Stack, mem: &mut Memo) {
     let op = pr.current().unwrap();
 
     let value = op.value.clone().unwrap().clone();
-    let raw_val = value.clone().raw();
+    let raw_val = value.raw();
 
     if raw_val.starts_with('$') {
-        st.push(mem[&raw_val].clone());
+        st.push(mem.get(&raw_val).unwrap().clone());
     } else {
         st.push(value);
     }
@@ -62,32 +61,25 @@ pub fn var(pr: &mut Program, st: &mut Stack, mem: &mut Memo) {
 
     let var_name = op.word.clone().unwrap();
 
-    let operand = st.pop();
-
     assert!(
         !mem.contains_key(&var_name),
         "variable {var_name} already defined"
     );
 
+    let operand = st.pop();
+
     mem.insert(var_name, operand);
 }
 
-pub fn get_op_executable() -> HashMap<String, Executable> {
-    let mut executables = HashMap::<String, Executable>::new();
-
-    executables.insert("JMP".to_string(), jmp);
-
-    executables.insert("EXEC".to_string(), exec);
-
-    executables.insert("MARK".to_string(), mark);
-
-    executables.insert("PUSH".to_string(), push);
-
-    executables.insert("SKIP".to_string(), skip);
-
-    executables.insert("CSKIP".to_string(), cskip);
-
-    executables.insert("VAR".to_string(), var);
-
-    executables
+pub fn get_op_executable(name: &str, pr: &mut Program, st: &mut Stack, mem: &mut Memo) {
+    return match name {
+        "JMP" =>  jmp(pr, st, mem),
+        "EXEC" => exec(pr, st, mem),
+        "MARK" => mark(pr, st, mem),
+        "PUSH" => push(pr, st, mem),
+        "SKIP" => skip(pr, st, mem),
+        "CSKIP" => cskip(pr, st, mem),
+        "VAR" => var(pr, st, mem),
+        _ => panic!("Unknown variable name")
+    }
 }

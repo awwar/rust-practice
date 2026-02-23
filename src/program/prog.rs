@@ -72,22 +72,16 @@ impl Operation {
 pub struct Program {
     ops: Vec<Operation>,
     trace: Vec<usize>,
-    op_idx: usize,
-    procedures: HashMap<&'static str, Box<dyn Procedure>>
+    op_idx: usize
 }
 
 impl Program {
     pub fn new() -> Self {
-        let procedures = get_procedures();
         Program {
             ops: vec![],
             trace: Vec::with_capacity(255),
-            op_idx: 0,
-            procedures
+            op_idx: 0
         }
-    }
-    pub fn get_procedures(&self) -> &HashMap<&'static str, Box<dyn Procedure>> {
-        &self.procedures
     }
     pub fn merge(&mut self, prog: Program) {
         self.ops.extend(prog.ops);

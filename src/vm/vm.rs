@@ -1,6 +1,6 @@
 use crate::program::{Operation, Program, Value};
-use crate::vm::operation::{get_op_executable, Executable};
-use std::collections::HashMap;
+use crate::vm::operation::{get_op_executable};
+use std::collections::{BTreeMap, HashMap};
 use std::time::Duration;
 use std::{env, thread};
 
@@ -21,16 +21,14 @@ impl Stack {
     }
 }
 
-pub type Memo = HashMap<String, Value>;
+pub type Memo = BTreeMap<String, Value>;
 
 pub struct VM {
-    operations: HashMap<String, Executable>,
 }
 
 impl VM {
     pub fn new() -> VM {
         VM {
-            operations: get_op_executable(),
         }
     }
     pub fn execute(&self, pr: &mut Program) {
@@ -47,14 +45,7 @@ impl VM {
                 Some(o) => o,
             };
 
-            let op_executable = match self.operations.get(op.name) {
-                None => panic!("unknown procedure: {}", op.name),
-                Some(p) => p,
-            };
-
-            // debug(op, stack);
-
-            op_executable(pr, stack, memo);
+            get_op_executable(op.name, pr, stack, memo);
         }
     }
 }

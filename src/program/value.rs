@@ -1,4 +1,4 @@
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub enum Value {
     Integer(i64),
     Float(f64),

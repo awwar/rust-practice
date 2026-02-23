@@ -17,17 +17,15 @@ impl Compiler {
         let node_type: NodeType = node.node_type;
 
         if node_type == NodeType::Operation {
-            let binding = get_procedures();
             let proc_name = node_copy.value.as_str();
-            if let Some(procedure) = binding.get(&proc_name) {
-                let mut sub_compiler = Compiler::new();
+            let procedure = get_procedures(&proc_name);
+            let mut sub_compiler = Compiler::new();
 
-                procedure.compile(&mut sub_compiler, node_copy.clone())?;
+            procedure.compile(&mut sub_compiler, node_copy.clone())?;
 
-                self.program.merge(sub_compiler.program);
+            self.program.merge(sub_compiler.program);
 
-                return Ok(());
-            }
+            return Ok(());
         }
 
         self.sub_compile(node_copy)

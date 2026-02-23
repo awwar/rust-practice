@@ -136,14 +136,10 @@ impl Parser {
             return Err(self.error(token.at, "node declaration must start with node name"));
         }
 
-        let procedures = get_procedures();
         let proc_name = token.value.to_uppercase();
-        let proc = procedures.get(&proc_name.as_str());
-        if proc.is_some() {
-            return proc.unwrap().parse(token.clone(), self);
-        }
+        let proc = get_procedures(&proc_name);
 
-        Err(self.error(token.at, format!("token {} not supported", token.value).as_str()))
+        return proc.parse(token.clone(), self);
     }
 
     pub fn subparse_list_in_bracers(&mut self, length: Option<usize>) -> Result<Vec<Node>, String> {

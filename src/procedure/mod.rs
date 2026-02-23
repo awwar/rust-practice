@@ -1,40 +1,48 @@
 mod call;
+mod expression;
 mod r#if;
 mod print;
-mod r#return;
-mod var;
-mod expression;
 mod procedure;
 mod rand;
+mod r#return;
 mod sum;
 mod type_converter;
+mod var;
 
 pub use crate::procedure::procedure::Procedure;
 use crate::program::Value;
-use std::collections::HashMap;
 
-pub fn get_procedures() -> HashMap<&'static str, Box<dyn Procedure>> {
-    let mut procedures = HashMap::<&'static str, Box<dyn Procedure>>::new();
-
-    procedures.insert("CALL", Box::new(call::Call {}));
-    procedures.insert("IF", Box::new(r#if::If {}));
-    procedures.insert("PRINT", Box::new(print::Print {}));
-    procedures.insert("RETURN", Box::new(r#return::Return {}));
-    procedures.insert("VAR", Box::new(var::Var {}));
-    procedures.insert("RAND", Box::new(rand::Rand::new()));
-    procedures.insert("SUM", Box::new(sum::Sum {}));
-    procedures.insert("BOOL", Box::new(type_converter::TypeConverter { op: Value::to_bool }));
-    procedures.insert("FLOAT", Box::new(type_converter::TypeConverter { op: Value::to_float }));
-    procedures.insert("STRING", Box::new(type_converter::TypeConverter { op: Value::to_string }));
-    procedures.insert("VOID", Box::new(type_converter::TypeConverter { op: |_| { Value::Integer(0) } }));
-    procedures.insert("+", Box::new(expression::Expression { op: Value::add }));
-    procedures.insert("-", Box::new(expression::Expression { op: Value::subtract }));
-    procedures.insert("/", Box::new(expression::Expression { op: Value::divide }));
-    procedures.insert("*", Box::new(expression::Expression { op: Value::multiply }));
-    procedures.insert("^", Box::new(expression::Expression { op: Value::power }));
-    procedures.insert("=", Box::new(expression::Expression { op: Value::eq }));
-    procedures.insert("<", Box::new(expression::Expression { op: Value::less }));
-    procedures.insert(">", Box::new(expression::Expression { op: Value::more }));
-
-    procedures
+pub fn get_procedures(name: &str) -> Box<dyn Procedure> {
+    return match name {
+        "CALL" => Box::new(call::Call {}),
+        "IF" => Box::new(r#if::If {}),
+        "PRINT" => Box::new(print::Print {}),
+        "RETURN" => Box::new(r#return::Return {}),
+        "VAR" => Box::new(var::Var {}),
+        "RAND" => Box::new(rand::Rand::new()),
+        "SUM" => Box::new(sum::Sum {}),
+        "BOOL" => Box::new(type_converter::TypeConverter { op: Value::to_bool }),
+        "FLOAT" => Box::new(type_converter::TypeConverter {
+            op: Value::to_float,
+        }),
+        "STRING" => Box::new(type_converter::TypeConverter {
+            op: Value::to_string,
+        }),
+        "VOID" => Box::new(type_converter::TypeConverter {
+            op: |_| Value::Integer(0),
+        }),
+        "+" => Box::new(expression::Expression { op: Value::add }),
+        "-" => Box::new(expression::Expression {
+            op: Value::subtract,
+        }),
+        "/" => Box::new(expression::Expression { op: Value::divide }),
+        "*" => Box::new(expression::Expression {
+            op: Value::multiply,
+        }),
+        "^" => Box::new(expression::Expression { op: Value::power }),
+        "=" => Box::new(expression::Expression { op: Value::eq }),
+        "<" => Box::new(expression::Expression { op: Value::less }),
+        ">" => Box::new(expression::Expression { op: Value::more }),
+        _ => panic!("Unknown procedure {}", name),
+    };
 }
