@@ -14,7 +14,7 @@ impl Value {
             Value::Float(a) => a.to_string(),
             Value::Boolean(a) => a.to_string(),
             Value::String(a) => a.clone(),
-            Value::Array(a) => format!("[{}]", a.iter().map(|v| v.repr()).collect::<Vec<_>>().join(",")),
+            Value::Array(a) => format!("[{}]", a.iter().map(Value::repr).collect::<Vec<_>>().join(",")),
             _ => panic!("unable to int({self:?})")
         }
     }
@@ -70,7 +70,7 @@ impl Value {
             (Value::Array(a), Value::Array(b)) => {
                 let mut new_val = a.clone();
                 new_val.extend(b.clone());
-                return Value::Array(new_val);
+                Value::Array(new_val)
             },
             _ => panic!("unable to {} + {}", self.repr(), r.repr())
         }

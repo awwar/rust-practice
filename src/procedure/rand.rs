@@ -6,7 +6,6 @@ use crate::vm::Stack;
 use rand::{Rng, RngExt};
 use rand::rngs::SmallRng;
 use rand::{SeedableRng};
-use crate::procedure::array::FillRandom;
 
 pub struct Rand {
     rng: Rc<RefCell<SmallRng>>,

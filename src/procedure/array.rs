@@ -44,7 +44,7 @@ impl Procedure for FillRandom {
             sc.sub_compile(param.clone()).unwrap();
         }
 
-        sc.program.new_exec(node.value.to_string(), 4);
+        sc.program.new_exec(node.value.clone(), 4);
         sc.program.new_var(node.params.last().unwrap().value.clone());
 
         Ok(())

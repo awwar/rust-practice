@@ -36,7 +36,7 @@ pub fn get_procedures(name: &str) -> Box<dyn Procedure> {
         }),
         "ARRAY" => Box::new(type_converter::TypeConverter {
             op: |l: &Value| {
-                return Value::Array(match l {
+                Value::Array(match l {
                     Value::Integer(_) => Vec::<Value>::new(),
                     Value::Float(_) => Vec::<Value>::new(),
                     Value::Boolean(_) => Vec::<Value>::new(),
