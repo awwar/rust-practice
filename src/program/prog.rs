@@ -58,7 +58,7 @@ impl Operation {
             sb.push_str(format!(" {}", self.word.clone().unwrap()).as_str());
         }
         if self.value.is_some() {
-            sb.push_str(format!(" {}", self.value.clone().unwrap().raw()).as_str());
+            sb.push_str(format!(" {}", self.value.clone().unwrap().repr()).as_str());
         }
         if self.count.is_some() {
             sb.push_str(format!(" {}", self.count.unwrap().clone()).as_str());

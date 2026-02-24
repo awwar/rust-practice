@@ -3,9 +3,10 @@ use std::rc::Rc;
 use crate::procedure::Procedure;
 use crate::program::Value;
 use crate::vm::Stack;
-use rand::RngExt;
+use rand::{Rng, RngExt};
 use rand::rngs::SmallRng;
 use rand::{SeedableRng};
+use crate::procedure::array::FillRandom;
 
 pub struct Rand {
     rng: Rc<RefCell<SmallRng>>,
@@ -13,8 +14,10 @@ pub struct Rand {
 
 impl Rand {
     pub(crate) fn new() -> Rand {
+        let mut rng = rand::rng();
+
         Rand {
-            rng: Rc::new(RefCell::new(SmallRng::seed_from_u64(42)))
+            rng: Rc::new(RefCell::new(SmallRng::seed_from_u64(rng.next_u64()))),
         }
     }
 }

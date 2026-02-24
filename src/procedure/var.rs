@@ -7,7 +7,7 @@ pub struct Var {}
 
 impl Procedure for Var {
     fn parse(&self, token: Token, parser: &mut Parser) -> Result<Node, String> {
-        // RETURN (expression)
+        // VAR (expression) $VAR_NAME
         let expr = parser.subparse_one_in_bracers()?;
 
         let variable_name = parser.subparse_variable_name()?;

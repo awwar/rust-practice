@@ -1,6 +1,6 @@
 use std::cmp::PartialEq;
 
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Clone, Debug)]
 pub enum NodeType {
     Operation,
     Constant,

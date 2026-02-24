@@ -14,7 +14,7 @@ use std::fs;
 use std::time::Instant;
 
 fn main() {
-    let input = fs::read_to_string("./.example/index.mp")
+    let input = fs::read_to_string("./.example/array.mp")
         .expect("Should have been able to read the file");
 
     let stream = TokenStream::new(input);

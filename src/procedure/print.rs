@@ -12,14 +12,13 @@ impl Procedure for Print {
 
         Ok(Node::new_operation(token.value, vec![expr], token.at))
     }
-    fn execute(&self, argc: usize, _stack: &mut Stack) -> Result<(), String> {
+    fn execute(&self, argc: usize, stack: &mut Stack) -> Result<(), String> {
         if argc != 1 {
             return Err(String::from("argument count must be 1"));
         }
 
-        // let first_operand = stack.pop();
-        // //
-        // println!("{}", first_operand.raw());
+        let _ = stack.pop();
+        // println!("{}", first_operand.repr());
 
         Ok(())
     }

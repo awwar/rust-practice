@@ -1,3 +1,4 @@
+mod array;
 mod call;
 mod expression;
 mod r#if;
@@ -22,11 +23,28 @@ pub fn get_procedures(name: &str) -> Box<dyn Procedure> {
         "RAND" => Box::new(rand::Rand::new()),
         "SUM" => Box::new(sum::Sum {}),
         "BOOL" => Box::new(type_converter::TypeConverter { op: Value::to_bool }),
+        "FILL_RANDOM" => Box::new(array::FillRandom::new()),
+        "AT" => Box::new(array::At {}),
         "FLOAT" => Box::new(type_converter::TypeConverter {
             op: Value::to_float,
         }),
         "STRING" => Box::new(type_converter::TypeConverter {
             op: Value::to_string,
+        }),
+        "INT" => Box::new(type_converter::TypeConverter {
+            op: Value::to_integer,
+        }),
+        "ARRAY" => Box::new(type_converter::TypeConverter {
+            op: |l: &Value| {
+                return Value::Array(match l {
+                    Value::Integer(_) => Vec::<Value>::new(),
+                    Value::Float(_) => Vec::<Value>::new(),
+                    Value::Boolean(_) => Vec::<Value>::new(),
+                    Value::String(_) => Vec::<Value>::new(),
+                    Value::Array(_) => Vec::<Value>::new(),
+                    _ => {panic!("unable to create array of {}", l.repr())}
+                })
+            }
         }),
         "VOID" => Box::new(type_converter::TypeConverter {
             op: |_| Value::Integer(0),

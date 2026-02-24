@@ -29,7 +29,7 @@ pub fn push(pr: &mut Program, st: &mut Stack, mem: &mut Memo) {
     let op = pr.current().unwrap();
 
     let value = op.value.clone().unwrap().clone();
-    let raw_val = value.raw();
+    let raw_val = value.repr();
 
     if raw_val.starts_with('$') {
         st.push(mem.get(&raw_val).unwrap().clone());
