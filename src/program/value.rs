@@ -15,7 +15,7 @@ impl Value {
             Value::Boolean(a) => a.to_string(),
             Value::String(a) => a.clone(),
             Value::Array(a) => format!("[{}]", a.iter().map(Value::repr).collect::<Vec<_>>().join(",")),
-            _ => panic!("unable to int({self:?})")
+            // _ => panic!("unable to int({self:?})")
         }
     }
     pub fn to_integer(&self) -> Value {

@@ -87,16 +87,6 @@ impl Parser {
         Ok(Node::new_flow_declaration(token.value, list, token.at))
     }
 
-    pub fn subparse_flow_link(&mut self) -> Result<Node, String> {
-        let word = self.subparse_word()?;
-
-        if !word.value.starts_with('#') {
-            return Err(self.error(self.current_position, "flow link must start with #"));
-        }
-
-        Ok(Node::new_flow_link(word.value, word.token_position))
-    }
-
     pub fn subparse_variable_name(&mut self) -> Result<Node, String> {
         self.current_position += 1;
         let token = match self.stream.get(self.current_position) {
