@@ -90,7 +90,7 @@ impl Parser {
     pub fn subparse_flow_link(&mut self) -> Result<Node, String> {
         let word = self.subparse_word()?;
 
-        if !word.value.starts_with("#") {
+        if !word.value.starts_with('#') {
             return Err(self.error(self.current_position, "flow link must start with #"));
         }
 

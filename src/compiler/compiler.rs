@@ -1,6 +1,5 @@
 use crate::control_structures::get_control_structures;
 use crate::parser::{Node, NodeType};
-use crate::procedure::get_procedures;
 use crate::program::{Program, Value};
 
 pub struct Compiler {
@@ -18,7 +17,7 @@ impl Compiler {
         let node_type: NodeType = node.node_type;
 
         if node_type == NodeType::Program {
-            for child in node_copy.params.iter() {
+            for child in &node_copy.params {
                 let child_copy = child.clone();
                 self.compile(child_copy)?;
             }
@@ -63,14 +62,14 @@ impl Compiler {
             return Ok(());
         }
 
-        Err(format!("Invalid node type: {:?}", node_type))
+        Err(format!("Invalid node type: {node_type:?}"))
     }
 
     pub fn sub_compile(&mut self, node: Node) -> Result<(), String> {
         let node_copy = node.clone();
         let node_type: NodeType = node.node_type;
 
-        for child in node_copy.params.iter() {
+        for child in &node_copy.params {
             let child_copy = child.clone();
             self.sub_compile(child_copy)?;
         }

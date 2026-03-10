@@ -1,4 +1,3 @@
-use crate::parser::{Node, NodeType};
 use crate::procedure::Procedure;
 use crate::program::Value;
 use crate::vm::Stack;
@@ -6,7 +5,6 @@ use rand::prelude::SmallRng;
 use rand::{Rng, RngExt, SeedableRng};
 use std::cell::RefCell;
 use std::rc::Rc;
-use crate::compiler::Compiler;
 
 pub struct FillRandom {
     rng: Rc<RefCell<SmallRng>>,

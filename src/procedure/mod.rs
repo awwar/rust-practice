@@ -6,8 +6,7 @@ mod sum;
 mod type_converter;
 
 use crate::compiler::Compiler;
-use crate::lexer::Token;
-use crate::parser::{Node, Parser};
+use crate::parser::Node;
 use crate::program::Value;
 use crate::vm::Stack;
 
