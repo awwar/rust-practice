@@ -1,6 +1,6 @@
+use crate::control_structures::get_control_structures;
 use crate::lexer::{TokenName, TokenStream};
 use crate::parser::node::Node;
-use crate::procedure::get_procedures;
 
 pub struct Parser {
     last_position: usize,
@@ -88,17 +88,13 @@ impl Parser {
     }
 
     pub fn subparse_flow_link(&mut self) -> Result<Node, String> {
-        self.current_position += 1;
-        let token = match self.stream.get(self.current_position) {
-            None => return Err(format!("unable to find token at {:?}", self.current_position)),
-            Some(token) => token
-        };
+        let word = self.subparse_word()?;
 
-        if token.name != TokenName::Word || !token.starts_with("#") {
+        if !word.value.starts_with("#") {
             return Err(self.error(self.current_position, "flow link must start with #"));
         }
 
-        Ok(Node::new_flow_link(token.value, token.at))
+        Ok(Node::new_flow_link(word.value, word.token_position))
     }
 
     pub fn subparse_variable_name(&mut self) -> Result<Node, String> {
@@ -136,8 +132,8 @@ impl Parser {
             return Err(self.error(token.at, "node declaration must start with node name"));
         }
 
-        let proc_name = token.value.to_uppercase();
-        let proc = get_procedures(&proc_name);
+        let control_structure_name = token.value.to_uppercase();
+        let proc = get_control_structures(&control_structure_name);
 
         proc.parse(token.clone(), self)
     }

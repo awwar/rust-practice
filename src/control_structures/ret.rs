@@ -1,11 +1,11 @@
 use crate::compiler::Compiler;
+use crate::control_structures::ControlStructures;
 use crate::lexer::Token;
 use crate::parser::{Node, Parser};
-use crate::procedure::Procedure;
 
 pub struct Return {}
 
-impl Procedure for Return {
+impl ControlStructures for Return {
     fn parse(&self, token: Token, parser: &mut Parser) -> Result<Node, String> {
         // RETURN (expression)
         let expr = parser.subparse_one_in_bracers()?;

@@ -1,3 +1,4 @@
+use crate::control_structures::get_control_structures;
 use crate::parser::{Node, NodeType};
 use crate::procedure::get_procedures;
 use crate::program::{Program, Value};
@@ -16,27 +17,18 @@ impl Compiler {
         let node_copy = node.clone();
         let node_type: NodeType = node.node_type;
 
-        if node_type == NodeType::Operation {
-            let proc_name = node_copy.value.as_str();
-            let procedure = get_procedures(proc_name);
-            let mut sub_compiler = Compiler::new();
-
-            procedure.compile(&mut sub_compiler, node_copy.clone())?;
-
-            self.program.merge(sub_compiler.program);
+        if node_type == NodeType::Program {
+            for child in node_copy.params.iter() {
+                let child_copy = child.clone();
+                self.compile(child_copy)?;
+            }
 
             return Ok(());
         }
 
-        self.sub_compile(node_copy)
-    }
-
-    pub fn sub_compile(&mut self, node: Node) -> Result<(), String> {
-        let node_copy = node.clone();
-        let node_type: NodeType = node.node_type;
-
-        let mut from_param: usize = 0;
         if node_type == NodeType::FlowDeclaration {
+            let mut from_param: usize = 0;
+
             self.program.new_mark(node_copy.value.clone());
 
             for child in &node_copy.params {
@@ -50,11 +42,37 @@ impl Compiler {
                 }
                 self.program.new_var(child.params.first().unwrap().value.clone());
             }
+
+            for child in node_copy.params.iter().skip(from_param) {
+                let child_copy = child.clone();
+                self.compile(child_copy)?;
+            }
+
+            return Ok(());
         }
 
-        for child in node_copy.params.iter().skip(from_param) {
+        if node_type == NodeType::Operation {
+            let proc_name = node_copy.value.as_str();
+            let procedure = get_control_structures(proc_name);
+            let mut sub_compiler = Compiler::new();
+
+            procedure.compile(&mut sub_compiler, node_copy.clone())?;
+
+            self.program.merge(sub_compiler.program);
+
+            return Ok(());
+        }
+
+        Err(format!("Invalid node type: {:?}", node_type))
+    }
+
+    pub fn sub_compile(&mut self, node: Node) -> Result<(), String> {
+        let node_copy = node.clone();
+        let node_type: NodeType = node.node_type;
+
+        for child in node_copy.params.iter() {
             let child_copy = child.clone();
-            self.compile(child_copy)?;
+            self.sub_compile(child_copy)?;
         }
 
         if node_type == NodeType::Variable {

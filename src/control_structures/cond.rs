@@ -1,11 +1,11 @@
 use crate::compiler::Compiler;
+use crate::control_structures::ControlStructures;
 use crate::lexer::Token;
 use crate::parser::{Node, Parser};
-use crate::procedure::Procedure;
 
 pub struct If {}
 
-impl Procedure for If {
+impl ControlStructures for If {
     fn parse(&self, token: Token, parser: &mut Parser) -> Result<Node, String> {
         // IF (rand() > 1) (#MORE, #LESS)
         let expr = parser.subparse_one_in_bracers()?;
@@ -24,7 +24,7 @@ impl Procedure for If {
     fn compile(&self, sc: &mut Compiler, node: Node) -> Result<(), String> {
         let expr = node.params.first().unwrap().clone();
 
-        sc.sub_compile(expr).unwrap();
+        sc.sub_compile(expr)?;
 
         sc.program.new_cskip(2);
         sc.program.new_jmp(node.params.get(2).unwrap().value.clone());

@@ -1,5 +1,4 @@
-use crate::lexer::Token;
-use crate::parser::{Node, NodeType, Parser};
+use crate::parser::{Node, NodeType};
 use crate::procedure::Procedure;
 use crate::program::Value;
 use crate::vm::Stack;
@@ -24,31 +23,29 @@ impl FillRandom {
 }
 
 impl Procedure for FillRandom {
-    fn parse(&self, token: Token, parser: &mut Parser) -> Result<Node, String> {
-        // FILL_RANDOM ($INITIAL_VALUE, 10, -100, 100) $FILLED_VALUE
-        let mut exprs = parser.subparse_list_in_bracers(Some(4))?;
-
-        assert_eq!(exprs[0].node_type, NodeType::Variable);
-        assert_eq!(exprs[1].node_type, NodeType::Integer);
-        assert_eq!(exprs[2].node_type, NodeType::Integer);
-        assert_eq!(exprs[3].node_type, NodeType::Integer);
-
-        let variable_name = parser.subparse_variable_name()?;
-
-        exprs.extend(vec![variable_name]);
-
-        Ok(Node::new_operation(token.value, exprs, token.at))
-    }
-    fn compile(&self, sc: &mut Compiler, node: Node) -> Result<(), String> {
-        for param in node.params.iter().take(node.params.len() - 1) {
-            sc.sub_compile(param.clone()).unwrap();
-        }
-
-        sc.program.new_exec(node.value.clone(), 4);
-        sc.program.new_var(node.params.last().unwrap().value.clone());
-
-        Ok(())
-    }
+    // fn parse(&self, procedure: Node, variable: Node, args: Vec<Node>) -> Result<Node, String> {
+    //     // FILL_RANDOM ($INITIAL_VALUE, 10, -100, 100) $FILLED_VALUE
+    //
+    //     assert_eq!(args[0].node_type, NodeType::Variable);
+    //     assert_eq!(args[1].node_type, NodeType::Integer);
+    //     assert_eq!(args[2].node_type, NodeType::Integer);
+    //     assert_eq!(args[3].node_type, NodeType::Integer);
+    //
+    //     let mut params = vec![variable];
+    //     params.extend(args);
+    //
+    //     Ok(Node::new_operation(procedure.value, params, procedure.token_position))
+    // }
+    // fn compile(&self, sc: &mut Compiler, node: Node) -> Result<(), String> {
+    //     for param in node.params.iter().take(node.params.len() - 1) {
+    //         sc.sub_compile(param.clone())?;
+    //     }
+    //
+    //     sc.program.new_exec(node.value.clone(), 4);
+    //     sc.program.new_var(node.params.last().unwrap().value.clone());
+    //
+    //     Ok(())
+    // }
     fn execute(&self, argc: usize, stack: &mut Stack) -> Result<(), String> {
         if argc != 4 {
             return Err(String::from("argument count must be 4"));
@@ -80,7 +77,6 @@ impl Procedure for At {
         let Value::Integer(count) = stack.pop() else { todo!() };
         let Value::Array(array) = stack.pop() else { todo!() };
         let val: Value = (array)[count as usize].clone();
-
 
         stack.push(val);
 

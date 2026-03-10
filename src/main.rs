@@ -5,6 +5,7 @@ mod program;
 mod util;
 mod procedure;
 mod vm;
+mod control_structures;
 
 use crate::compiler::Compiler;
 use crate::lexer::TokenStream;

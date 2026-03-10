@@ -8,18 +8,18 @@ call #FLIP_COIN (0.5) $FLIP_COIN_RESULT
 
 if ($FLIP_COIN_RESULT) (#MORE, #LESS)
 
-print ("Try Next?")
+call print ("Try Next?") $_
 
 return (void(0))
 
 #MORE() void
-print ("you're WIN!")
+call print ("you're WIN!") $_
 
 #LESS() bool
 var (string($SOME_VALUE)) $STR_SOME_VALUE
 var (sum("you're lose ", $STR_SOME_VALUE, " points!")) $OUT_RESULT
 
-print ($OUT_RESULT)
+call print ($OUT_RESULT) $_
 
 #FLIP_COIN(float($FLIP_COIN_ARG0)) bool
 
