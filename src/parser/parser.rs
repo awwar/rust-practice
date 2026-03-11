@@ -63,6 +63,7 @@ impl Parser {
 
         let args = self.subparse_list_in_bracers(None)?;
 
+        // let mapped_args = args.iter().map(|node: Node| Node::new_operation())
 
         let return_param = self.subparse_word()?;
 

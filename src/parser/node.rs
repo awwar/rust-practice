@@ -164,4 +164,8 @@ impl Node {
     pub fn is_flow_link(&self) -> bool {
         self.node_type == NodeType::FlowLink
     }
+
+    pub fn is_flow_link_word(&self) -> bool {
+        self.value.starts_with("#")
+    }
 }

@@ -1,5 +1,6 @@
 use crate::control_structures::get_control_structures;
 use crate::parser::{Node, NodeType};
+use crate::procedure::get_procedures;
 use crate::program::{Program, Value};
 
 pub struct Compiler {
@@ -35,11 +36,8 @@ impl Compiler {
                 if child.node_type == NodeType::Constant {
                     break;
                 }
-                self.program.new_exec(child.value.clone(), 1);
-                if child.params.len() != 1 {
-                    return Err(format!("Invalid number of flow arguments: {}", child.params.len()));
-                }
-                self.program.new_var(child.params.first().unwrap().value.clone());
+                self.sub_compile(child.params.first().unwrap().clone())?;
+                self.program.new_var(child.params.last().unwrap().value.clone());
             }
 
             for child in node_copy.params.iter().skip(from_param) {
@@ -69,15 +67,15 @@ impl Compiler {
         let node_copy = node.clone();
         let node_type: NodeType = node.node_type;
 
-        for child in &node_copy.params {
-            let child_copy = child.clone();
-            self.sub_compile(child_copy)?;
-        }
+        if node_type == NodeType::Operation {
+            let procedure = get_procedures(&node_copy);
+            let mut sub_compiler = Compiler::new();
 
-        if node_type == NodeType::Variable {
+            procedure.compile(&mut sub_compiler, node_copy.clone())?;
+
+            self.program.merge(sub_compiler.program);
+        } else if node_type == NodeType::Variable {
             self.program.new_push(Value::String(node_copy.value.clone()));
-        } else if node_type == NodeType::Operation {
-            self.program.new_exec(node_copy.value.clone(), node_copy.params.len());
         } else if node_type == NodeType::Constant || node_type == NodeType::String {
             self.program.new_push(Value::String(node_copy.value.clone()));
         } else if node_type == NodeType::Float {

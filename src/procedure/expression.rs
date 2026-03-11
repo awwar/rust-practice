@@ -1,12 +1,30 @@
-use crate::procedure::Procedure;
+use crate::parser::Node;
+use crate::procedure::{Procedure};
 use crate::program::Value;
 use crate::vm::Stack;
 
+pub fn get_procedures() -> Vec<Box<dyn Procedure>> {
+    vec![
+        Box::new(Expression {v: "+",  op: Value::add }),
+        Box::new(Expression {v: "-",  op: Value::subtract }),
+        Box::new(Expression {v: "/",  op: Value::divide }),
+        Box::new(Expression {v: "*",  op: Value::multiply }),
+        Box::new(Expression {v: "^",  op: Value::power }),
+        Box::new(Expression {v: "=",  op: Value::eq }),
+        Box::new(Expression {v: "<",  op: Value::less }),
+        Box::new(Expression {v: ">",  op: Value::more }),
+    ]
+}
+
 pub struct Expression {
-    pub op: fn(l: &Value, r: &Value) -> Value,
+    op: fn(l: &Value, r: &Value) -> Value,
+    v: &'static str,
 }
 
 impl Procedure for Expression {
+    fn support(&self, node: &Node) -> bool {
+        node.value.eq(self.v)
+    }
     fn execute(&self, argc: usize, stack: &mut Stack) -> Result<(), String> {
         assert_eq!(argc, 2, "Procedure expects 2 arguments");
 

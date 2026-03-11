@@ -6,6 +6,13 @@ use crate::vm::Stack;
 use rand::{Rng, RngExt};
 use rand::rngs::SmallRng;
 use rand::{SeedableRng};
+use crate::parser::Node;
+
+pub fn get_procedures() -> Vec<Box<dyn Procedure>> {
+    vec![
+        Box::new(Rand::new()),
+    ]
+}
 
 pub struct Rand {
     rng: Rc<RefCell<SmallRng>>,
@@ -22,6 +29,10 @@ impl Rand {
 }
 
 impl Procedure for Rand {
+    fn support(&self, node: &Node) -> bool {
+        return true;
+    }
+
     fn execute(&self, argc: usize, stack: &mut Stack) -> Result<(), String> {
         if argc != 0 {
             return Err(String::from("argument count must be zero"));

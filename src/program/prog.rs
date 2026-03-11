@@ -1,4 +1,5 @@
 use std::collections::BTreeMap;
+use crate::procedure::Procedure;
 use crate::program::Value;
 
 type OperationName = &'static str;
@@ -14,6 +15,7 @@ const SKIP: OperationName = "SKIP";
 pub struct Operation {
     pub name: OperationName,
     pub count: Option<usize>,
+    pub id: Option<usize>,
     pub word: Option<String>,
     pub value: Option<Value>,
 }
@@ -23,6 +25,7 @@ impl Operation {
         Self {
             name,
             value: Some(value),
+            id: None,
             word: None,
             count: None,
         }
@@ -31,6 +34,7 @@ impl Operation {
         Self {
             name,
             word: Some(word),
+            id: None,
             count: None,
             value: None,
         }
@@ -39,15 +43,17 @@ impl Operation {
         Self {
             name,
             count: Some(count),
+            id: None,
             value: None,
             word: None,
         }
     }
-    pub fn new_word_count(name: OperationName, word: String, count: usize) -> Self {
+    pub fn new_word_count(name: OperationName, word: String, id: usize, count: usize) -> Self {
         Self {
             name,
             word: Some(word),
             count: Some(count),
+            id: Some(id),
             value: None,
         }
     }
@@ -70,6 +76,7 @@ impl Operation {
 
 pub struct Program {
     ops: Vec<Operation>,
+    procedures: Vec<Box<dyn Procedure>>,
     marks: BTreeMap<String, usize>,
     trace: Vec<usize>,
     op_idx: usize
@@ -79,13 +86,24 @@ impl Program {
     pub fn new() -> Self {
         Program {
             ops: vec![],
+            procedures: vec![],
             trace: Vec::with_capacity(255),
             marks: BTreeMap::new(),
             op_idx: 0
         }
     }
     pub fn merge(&mut self, prog: Program) {
-        self.ops.extend(prog.ops);
+        for mut op in prog.ops.into_iter() {
+            if op.name == EXEC {
+                op.id = Some(op.id.unwrap() + prog.procedures.len() - 1)
+            }
+            self.ops.push(op);
+        }
+
+        self.procedures.extend(prog.procedures);
+    }
+    pub fn get_procedure(&self, id: usize) -> &Box<dyn Procedure> {
+        &self.procedures[id]
     }
     pub fn new_mark(&mut self, name: String) {
         self.ops.push(Operation::new_word(MARK, name.clone()));
@@ -107,8 +125,10 @@ impl Program {
     pub fn new_skip(&mut self, num: usize) {
         self.ops.push(Operation::new_count(SKIP, num));
     }
-    pub fn new_exec(&mut self, name: String, argc: usize) {
-        self.ops.push(Operation::new_word_count(EXEC, name, argc));
+    pub fn new_exec(&mut self, name: String, proc: Box<dyn Procedure>, argc: usize) {
+        self.procedures.push(proc);
+
+        self.ops.push(Operation::new_word_count(EXEC, name, self.procedures.len() - 1, argc));
     }
     pub fn is_end(&self) -> bool {
         self.op_idx > self.ops.len() - 1

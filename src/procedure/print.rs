@@ -1,9 +1,20 @@
+use crate::parser::Node;
 use crate::procedure::Procedure;
 use crate::vm::Stack;
+
+pub fn get_procedures() -> Vec<Box<dyn Procedure>> {
+    vec![
+        Box::new(Print {}),
+    ]
+}
 
 pub struct Print {}
 
 impl Procedure for Print {
+    fn support(&self, node: &Node) -> bool {
+        return true;
+    }
+
     fn execute(&self, argc: usize, stack: &mut Stack) -> Result<(), String> {
         if argc != 1 {
             return Err(String::from("argument count must be 1"));

@@ -1,3 +1,5 @@
+#![feature(smart_pointer_try_map)]
+
 mod compiler;
 mod parser;
 mod lexer;
@@ -15,7 +17,7 @@ use std::fs;
 use std::time::Instant;
 
 fn main() {
-    let input = fs::read_to_string("./.example/array.mp")
+    let input = fs::read_to_string("./.example/index.mp")
         .expect("Should have been able to read the file");
 
     let stream = TokenStream::new(input);

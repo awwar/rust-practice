@@ -1,4 +1,3 @@
-use crate::procedure::{get_procedures};
 use crate::program::{Program, Value};
 use crate::vm::vm::{Memo, Stack};
 
@@ -13,8 +12,7 @@ pub fn jmp(pr: &mut Program, _: &mut Stack, _: &mut Memo) {
 pub fn exec(pr: &mut Program, st: &mut Stack, _: &mut Memo) {
     let op = pr.current().unwrap();
 
-    let binding = op.word.clone().unwrap();
-    let proc = get_procedures(binding.as_str());
+    let proc = pr.get_procedure(op.id.unwrap());
     let argc = op.count.unwrap();
 
     proc.execute(argc, st).unwrap();
