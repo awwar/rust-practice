@@ -6,7 +6,6 @@ mod type_converter;
 
 use crate::compiler::Compiler;
 use crate::parser::Node;
-use crate::program::Value;
 use crate::vm::Stack;
 
 pub trait Procedure {
@@ -36,7 +35,7 @@ pub fn get_procedures(node: &Node) -> Box<dyn Procedure> {
     procedures.extend(rand::get_procedures());
     procedures.extend(type_converter::get_procedures());
 
-    for child in procedures.into_iter() {
+    for child in procedures {
         if child.support(node) {
             return child;
         }

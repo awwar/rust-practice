@@ -29,7 +29,7 @@ impl ControlStructures for Call {
         let subnode = node.params.first().unwrap();
 
         if subnode.is_flow_link_word() {
-            for n in subnode.params.iter() {
+            for n in &subnode.params {
                 sc.sub_compile(n.clone())?;
             }
 

@@ -93,9 +93,9 @@ impl Program {
         }
     }
     pub fn merge(&mut self, prog: Program) {
-        for mut op in prog.ops.into_iter() {
+        for mut op in prog.ops {
             if op.name == EXEC {
-                op.id = Some(op.id.unwrap() + prog.procedures.len() - 1)
+                op.id = Some(op.id.unwrap() + prog.procedures.len() - 1);
             }
             self.ops.push(op);
         }

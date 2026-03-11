@@ -11,8 +11,8 @@ pub fn get_procedures() -> Vec<Box<dyn Procedure>> {
 pub struct Print {}
 
 impl Procedure for Print {
-    fn support(&self, node: &Node) -> bool {
-        return true;
+    fn support(&self, _node: &Node) -> bool {
+        true
     }
 
     fn execute(&self, argc: usize, stack: &mut Stack) -> Result<(), String> {

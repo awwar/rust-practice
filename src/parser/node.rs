@@ -166,6 +166,6 @@ impl Node {
     }
 
     pub fn is_flow_link_word(&self) -> bool {
-        self.value.starts_with("#")
+        self.value.starts_with('#')
     }
 }
