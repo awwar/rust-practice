@@ -4,9 +4,9 @@ use crate::vm::vm::{Memo, Stack};
 pub type Executable = fn(&mut Program, &mut Stack, &mut Memo);
 
 pub fn jmp(pr: &mut Program, _: &mut Stack, _: &mut Memo) {
-    let mark_name = pr.current().unwrap().word.clone().unwrap();
+    let mark_id = pr.current().unwrap().id.unwrap();
     pr.trace_back();
-    pr.jump_to_mark(mark_name.as_str());
+    pr.jump_to_mark(mark_id);
 }
 
 pub fn exec(pr: &mut Program, st: &mut Stack, _: &mut Memo) {
@@ -26,16 +26,10 @@ pub fn mark(pr: &mut Program, _: &mut Stack, _: &mut Memo) {
 pub fn push(pr: &mut Program, st: &mut Stack, mem: &mut Memo) {
     let op = pr.current().unwrap();
 
-    if let Some(val) = &op.value {
-        match val {
-            Value::Variable(var) => st.push(mem[*var].clone()),
-            value => st.push(value.clone())
-        }
-
-        return;
+    match &op.value {
+        Value::Variable(var) => st.push(mem[*var].clone()),
+        value => st.push(value.clone())
     }
-
-    panic!("invalid op push - expecting value");
 }
 
 pub fn skip(pr: &mut Program, _: &mut Stack, _: &mut Memo) {
@@ -59,7 +53,7 @@ pub fn cskip(pr: &mut Program, st: &mut Stack, _: &mut Memo) {
 pub fn var(pr: &mut Program, st: &mut Stack, mem: &mut Memo) {
     let op = pr.current().unwrap();
 
-    let Some(Value::Variable(var)) = op.value else {panic!("invalid op var - expecting value")};
+    let Value::Variable(var) = op.value else {panic!("invalid op var - expecting value")};
     mem[var] = st.pop();
 }
 

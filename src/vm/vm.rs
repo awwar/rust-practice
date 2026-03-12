@@ -61,7 +61,7 @@ impl VM {
             return;
         }
 
-        thread::sleep(Duration::from_millis(100));
+        thread::sleep(Duration::from_millis(200));
         println!("> {} {}", op.to_string(), stack.len());
     }
 }

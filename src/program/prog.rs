@@ -16,27 +16,16 @@ pub struct Operation {
     pub name: OperationName,
     pub count: Option<usize>,
     pub id: Option<usize>,
-    pub word: Option<String>,
-    pub value: Option<Value>,
+    pub value: Value,
 }
 
 impl Operation {
     pub fn new_value(name: OperationName, value: Value) -> Self {
         Self {
             name,
-            value: Some(value),
-            id: None,
-            word: None,
-            count: None,
-        }
-    }
-    pub fn new_word(name: OperationName, word: String) -> Self {
-        Self {
-            name,
-            word: Some(word),
+            value,
             id: None,
             count: None,
-            value: None,
         }
     }
     pub fn new_count(name: OperationName, count: usize) -> Self {
@@ -44,17 +33,23 @@ impl Operation {
             name,
             count: Some(count),
             id: None,
-            value: None,
-            word: None,
+            value: Value::Null,
         }
     }
-    pub fn new_word_count(name: OperationName, word: String, id: usize, count: usize) -> Self {
+    pub fn new_word_count(name: OperationName, id: usize, count: usize) -> Self {
         Self {
             name,
-            word: Some(word),
             count: Some(count),
             id: Some(id),
-            value: None,
+            value: Value::Null,
+        }
+    }
+    pub fn new_id(name: OperationName, id: usize) -> Self {
+        Self {
+            name,
+            count: None,
+            id: Some(id),
+            value: Value::Null,
         }
     }
     pub fn to_string(&self) -> String {
@@ -66,11 +61,8 @@ impl Operation {
         if self.count.is_some() {
             sb.push_str(format!(" count: {},", self.count.unwrap().clone()).as_str());
         }
-        if self.word.is_some() {
-            sb.push_str(format!(" word: {},", self.word.clone().unwrap()).as_str());
-        }
-        if self.value.is_some() {
-            sb.push_str(format!(" value: {},", self.value.clone().unwrap().repr()).as_str());
+        if self.value.repr() != "<null>" {
+            sb.push_str(format!(" value: {},", self.value.repr()).as_str());
         }
 
         sb
@@ -80,8 +72,9 @@ impl Operation {
 pub struct Program {
     ops: Vec<Operation>,
     procedures: Vec<Box<dyn Procedure>>,
-    marks: BTreeMap<String, usize>,
-    variables: BTreeMap<String, usize>,
+    marks: Vec<usize>,
+    marks_map: BTreeMap<String, usize>,
+    variables_map: BTreeMap<String, usize>,
     trace: Vec<usize>,
     op_idx: usize
 }
@@ -91,40 +84,50 @@ impl Program {
         Program {
             ops: vec![],
             procedures: vec![],
+            marks: vec![0, 1],
             trace: Vec::with_capacity(255),
-            marks: BTreeMap::new(),
-            variables: BTreeMap::new(),
+            marks_map: BTreeMap::new(),
+            variables_map: BTreeMap::new(),
             op_idx: 0
         }
     }
     pub fn get_memo_size(&self) -> usize {
-        self.variables.len()
+        self.variables_map.len()
     }
     pub fn get_procedure(&self, id: usize) -> &Box<dyn Procedure> {
         &self.procedures[id]
     }
     pub fn new_mark(&mut self, name: String) {
-        self.ops.push(Operation::new_word(MARK, name.clone()));
+        let len = self.marks_map.len();
+        let v = self.marks_map.entry(name).or_insert(len);
 
-        self.marks.insert(name, self.ops.len() - 1);
+        self.ops.push(Operation::new_id(MARK, *v));
+
+        if self.marks.len() < *v {
+            self.marks.resize(*v + 1, 0);
+        }
+        self.marks[*v] = self.ops.len() - 1
     }
     pub fn new_push(&mut self, value: Value) {
         self.ops.push(Operation::new_value(PUSH, value));
     }
     pub fn new_push_var(&mut self, name: String) {
-        let len = self.variables.len();
-        let v = self.variables.entry(name).or_insert(len);
+        let len = self.variables_map.len();
+        let v = self.variables_map.entry(name).or_insert(len);
 
         self.ops.push(Operation::new_value(PUSH, Value::Variable(*v)));
     }
     pub fn new_var(&mut self, name: String) {
-        let len = self.variables.len();
-        let v = self.variables.entry(name).or_insert(len);
+        let len = self.variables_map.len();
+        let v = self.variables_map.entry(name).or_insert(len);
 
         self.ops.push(Operation::new_value(VAR, Value::Variable(*v)));
     }
     pub fn new_jmp(&mut self, name: String) {
-        self.ops.push(Operation::new_word(JMP, name));
+        let len = self.marks_map.len();
+        let v = self.marks_map.entry(name).or_insert(len);
+
+        self.ops.push(Operation::new_id(JMP, *v));
     }
     pub fn new_cskip(&mut self, num: usize) {
         self.ops.push(Operation::new_count(CSKIP, num));
@@ -132,16 +135,10 @@ impl Program {
     pub fn new_skip(&mut self, num: usize) {
         self.ops.push(Operation::new_count(SKIP, num));
     }
-    pub fn new_exec(&mut self, name: String, proc: Box<dyn Procedure>, argc: usize) {
+    pub fn new_exec(&mut self, proc: Box<dyn Procedure>, argc: usize) {
         let mut operation_id: Option<usize> = None;
 
-        // for (i, procedure) in self.procedures.iter().enumerate() {
-        //     if *procedure.debug() == proc.as_ref() {
-        //         operation_id = Some(i);
-        //
-        //         break
-        //     }
-        // }
+        //ToDo: try to find
 
         if operation_id.is_none() {
             self.procedures.push(proc);
@@ -149,7 +146,7 @@ impl Program {
             operation_id = Some(self.procedures.len() - 1);
         }
 
-        self.ops.push(Operation::new_word_count(EXEC, name, operation_id.unwrap(), argc));
+        self.ops.push(Operation::new_word_count(EXEC, operation_id.unwrap(), argc));
     }
     pub fn is_end(&self) -> bool {
         self.op_idx > self.ops.len() - 1
@@ -186,24 +183,18 @@ impl Program {
         }
         self.op_idx += num;
     }
-    pub fn jump_to_mark(&mut self, name: &str) {
-        if let Some(op_id) = self.marks.get(name) {
-            self.op_idx = *op_id;
-
-            return;
-        }
-
-        panic!("segmentation fault, {name} mark name not found")
+    pub fn jump_to_mark(&mut self, id: usize) {
+        self.op_idx = self.marks[id];
     }
     pub fn jump_to_program_begin(&mut self) {
-        self.jump_to_mark("#MAIN");
+        self.jump_to_mark(self.marks_map["#MAIN"]);
     }
     pub fn to_string(&self) -> String {
         let mut string = String::new();
 
         string.push_str("-- variable:\n");
 
-        for (name, idx) in &self.variables {
+        for (name, idx) in &self.variables_map {
             string.push_str(format!("{name}: ${idx}\n").as_str());
         }
 

@@ -23,7 +23,7 @@ pub trait Procedure {
 
         let proc = get_procedures(&node);
 
-        sc.program.new_exec(node.value.clone(), proc, node.params.len());
+        sc.program.new_exec(proc, node.params.len());
 
         Ok(())
     }
