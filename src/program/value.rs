@@ -17,7 +17,7 @@ impl Value {
             Value::Boolean(a) => a.to_string(),
             Value::String(a) => a.clone(),
             Value::Array(a) => format!("[{}]", a.iter().map(Value::repr).collect::<Vec<_>>().join(",")),
-            Value::Variable(a) => format!("${}", a),
+            Value::Variable(a) => format!("${a}"),
             Value::Null => "<null>".to_string(),
         }
     }

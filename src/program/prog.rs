@@ -115,13 +115,13 @@ impl Program {
         let len = self.variables.len();
         let v = self.variables.entry(name).or_insert(len);
 
-        self.ops.push(Operation::new_value(PUSH, Value::Variable(v.clone())));
+        self.ops.push(Operation::new_value(PUSH, Value::Variable(*v)));
     }
     pub fn new_var(&mut self, name: String) {
         let len = self.variables.len();
         let v = self.variables.entry(name).or_insert(len);
 
-        self.ops.push(Operation::new_value(VAR, Value::Variable(v.clone())));
+        self.ops.push(Operation::new_value(VAR, Value::Variable(*v)));
     }
     pub fn new_jmp(&mut self, name: String) {
         self.ops.push(Operation::new_word(JMP, name));
@@ -204,7 +204,7 @@ impl Program {
         string.push_str("-- variable:\n");
 
         for (name, idx) in &self.variables {
-            string.push_str(format!("{}: ${}\n", name, idx).as_str());
+            string.push_str(format!("{name}: ${idx}\n").as_str());
         }
 
         let mut i = 0;

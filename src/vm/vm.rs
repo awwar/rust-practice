@@ -1,6 +1,5 @@
 use crate::program::{Operation, Program, Value};
 use crate::vm::operation::{get_op_executable};
-use std::collections::BTreeMap;
 use std::time::Duration;
 use std::{env, thread};
 
