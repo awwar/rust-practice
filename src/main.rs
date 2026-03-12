@@ -1,5 +1,3 @@
-#![feature(smart_pointer_try_map)]
-
 mod compiler;
 mod parser;
 mod lexer;
