@@ -6,7 +6,7 @@ pub type Executable = fn(&mut Program, &mut Stack, &mut Memo);
 pub fn jmp(pr: &mut Program, _: &mut Stack, _: &mut Memo) {
     let mark_name = pr.current().unwrap().word.clone().unwrap();
     pr.trace_back();
-    pr.jump_to_mark(mark_name);
+    pr.jump_to_mark(mark_name.as_str());
 }
 
 pub fn exec(pr: &mut Program, st: &mut Stack, _: &mut Memo) {

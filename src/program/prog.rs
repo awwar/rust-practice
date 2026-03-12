@@ -172,19 +172,17 @@ impl Program {
         }
         self.op_idx += num;
     }
-    pub fn jump_to_mark(&mut self, name: String) {
-        let name_clone = name.clone();
-
-        if let Some(op_id) = self.marks.get(&name_clone) {
+    pub fn jump_to_mark(&mut self, name: &str) {
+        if let Some(op_id) = self.marks.get(name) {
             self.op_idx = *op_id;
 
             return;
         }
 
-        panic!("segmentation fault, {name_clone} mark name not found")
+        panic!("segmentation fault, {name} mark name not found")
     }
     pub fn jump_to_program_begin(&mut self) {
-        self.jump_to_mark("#MAIN".to_string());
+        self.jump_to_mark("#MAIN");
     }
     pub fn to_string(&self) -> String {
         let mut string = String::new();
