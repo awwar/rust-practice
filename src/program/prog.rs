@@ -2,15 +2,16 @@ use std::collections::BTreeMap;
 use crate::procedure::Procedure;
 use crate::program::Value;
 
-type OperationName = &'static str;
-
-const PUSH: OperationName = "PUSH";
-const EXEC: OperationName = "EXEC";
-const MARK: OperationName = "MARK";
-const JMP: OperationName = "JMP";
-const VAR: OperationName = "VAR";
-const CSKIP: OperationName = "CSKIP";
-const SKIP: OperationName = "SKIP";
+#[derive(Clone)]
+pub enum OperationName {
+    PUSH,
+    EXEC,
+    MARK,
+    JMP,
+    VAR,
+    CSKIP,
+    SKIP,
+}
 
 pub struct Operation {
     pub name: OperationName,
@@ -53,7 +54,9 @@ impl Operation {
         }
     }
     pub fn to_string(&self) -> String {
-        let mut sb = self.name.to_string();
+        // let mut sb = self.name.to_string();
+
+        let mut sb = String::new();
 
         if self.id.is_some() {
             sb.push_str(format!(" id: {},", self.id.unwrap().clone()).as_str());
@@ -76,7 +79,7 @@ pub struct Program {
     marks_map: BTreeMap<String, usize>,
     variables_map: BTreeMap<String, usize>,
     trace: Vec<usize>,
-    op_idx: usize
+    op_idx: usize,
 }
 
 impl Program {
@@ -88,7 +91,7 @@ impl Program {
             trace: Vec::with_capacity(255),
             marks_map: BTreeMap::new(),
             variables_map: BTreeMap::new(),
-            op_idx: 0
+            op_idx: 0,
         }
     }
     pub fn get_memo_size(&self) -> usize {
@@ -101,39 +104,39 @@ impl Program {
         let len = self.marks_map.len();
         let v = self.marks_map.entry(name).or_insert(len);
 
-        self.ops.push(Operation::new_id(MARK, *v));
+        self.ops.push(Operation::new_id(OperationName::MARK, *v));
 
         if self.marks.len() < *v {
             self.marks.resize(*v + 1, 0);
         }
-        self.marks[*v] = self.ops.len() - 1
+        self.marks[*v] = self.ops.len() - 1;
     }
     pub fn new_push(&mut self, value: Value) {
-        self.ops.push(Operation::new_value(PUSH, value));
+        self.ops.push(Operation::new_value(OperationName::PUSH, value));
     }
     pub fn new_push_var(&mut self, name: String) {
         let len = self.variables_map.len();
         let v = self.variables_map.entry(name).or_insert(len);
 
-        self.ops.push(Operation::new_value(PUSH, Value::Variable(*v)));
+        self.ops.push(Operation::new_value(OperationName::PUSH, Value::Variable(*v)));
     }
     pub fn new_var(&mut self, name: String) {
         let len = self.variables_map.len();
         let v = self.variables_map.entry(name).or_insert(len);
 
-        self.ops.push(Operation::new_value(VAR, Value::Variable(*v)));
+        self.ops.push(Operation::new_value(OperationName::VAR, Value::Variable(*v)));
     }
     pub fn new_jmp(&mut self, name: String) {
         let len = self.marks_map.len();
         let v = self.marks_map.entry(name).or_insert(len);
 
-        self.ops.push(Operation::new_id(JMP, *v));
+        self.ops.push(Operation::new_id(OperationName::JMP, *v));
     }
     pub fn new_cskip(&mut self, num: usize) {
-        self.ops.push(Operation::new_count(CSKIP, num));
+        self.ops.push(Operation::new_count(OperationName::CSKIP, num));
     }
     pub fn new_skip(&mut self, num: usize) {
-        self.ops.push(Operation::new_count(SKIP, num));
+        self.ops.push(Operation::new_count(OperationName::SKIP, num));
     }
     pub fn new_exec(&mut self, proc: Box<dyn Procedure>, argc: usize) {
         let mut operation_id: Option<usize> = None;
@@ -146,7 +149,7 @@ impl Program {
             operation_id = Some(self.procedures.len() - 1);
         }
 
-        self.ops.push(Operation::new_word_count(EXEC, operation_id.unwrap(), argc));
+        self.ops.push(Operation::new_word_count(OperationName::EXEC, operation_id.unwrap(), argc));
     }
     pub fn is_end(&self) -> bool {
         self.op_idx > self.ops.len() - 1

@@ -1,4 +1,4 @@
-use crate::program::{Program, Value};
+use crate::program::{OperationName, Program, Value};
 use crate::vm::vm::{Memo, Stack};
 
 pub type Executable = fn(&mut Program, &mut Stack, &mut Memo);
@@ -28,7 +28,7 @@ pub fn push(pr: &mut Program, st: &mut Stack, mem: &mut Memo) {
 
     match &op.value {
         Value::Variable(var) => st.push(mem[*var].clone()),
-        value => st.push(value.clone())
+        value => st.push(value.clone()),
     }
 }
 
@@ -53,19 +53,20 @@ pub fn cskip(pr: &mut Program, st: &mut Stack, _: &mut Memo) {
 pub fn var(pr: &mut Program, st: &mut Stack, mem: &mut Memo) {
     let op = pr.current().unwrap();
 
-    let Value::Variable(var) = op.value else {panic!("invalid op var - expecting value")};
+    let Value::Variable(var) = op.value else {
+        panic!("invalid op var - expecting value")
+    };
     mem[var] = st.pop();
 }
 
-pub fn get_op_executable(name: &str) -> Executable {
+pub fn get_op_executable(name: OperationName) -> Executable {
     match name {
-        "JMP" => jmp,
-        "EXEC" => exec,
-        "MARK" => mark,
-        "PUSH" => push,
-        "SKIP" => skip,
-        "CSKIP" => cskip,
-        "VAR" => var,
-        _ => panic!("Unknown variable name"),
+        OperationName::PUSH => push,
+        OperationName::EXEC => exec,
+        OperationName::MARK => mark,
+        OperationName::JMP => jmp,
+        OperationName::VAR => var,
+        OperationName::CSKIP => cskip,
+        OperationName::SKIP => skip,
     }
 }

@@ -47,7 +47,7 @@ impl VM {
             if let Some(op) = pr.current() {
                 self.debug(op, stack);
 
-                get_op_executable(op.name)(pr, stack, memo);
+                get_op_executable(op.name.clone())(pr, stack, memo);
 
                 continue;
             }
