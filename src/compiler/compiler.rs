@@ -51,11 +51,8 @@ impl Compiler {
         if node_type == NodeType::Operation {
             let proc_name = node_copy.value.as_str();
             let procedure = get_control_structures(proc_name);
-            let mut sub_compiler = Compiler::new();
 
-            procedure.compile(&mut sub_compiler, node_copy.clone())?;
-
-            self.program.merge(sub_compiler.program);
+            procedure.compile(self, node_copy.clone())?;
 
             return Ok(());
         }
@@ -69,11 +66,8 @@ impl Compiler {
 
         if node_type == NodeType::Operation {
             let procedure = get_procedures(&node_copy);
-            let mut sub_compiler = Compiler::new();
 
-            procedure.compile(&mut sub_compiler, node_copy.clone())?;
-
-            self.program.merge(sub_compiler.program);
+            procedure.compile(self, node_copy.clone())?;
         } else if node_type == NodeType::Variable {
             self.program.new_push(Value::String(node_copy.value.clone()));
         } else if node_type == NodeType::Constant || node_type == NodeType::String {

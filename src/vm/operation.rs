@@ -12,8 +12,8 @@ pub fn jmp(pr: &mut Program, _: &mut Stack, _: &mut Memo) {
 pub fn exec(pr: &mut Program, st: &mut Stack, _: &mut Memo) {
     let op = pr.current().unwrap();
 
-    let proc = pr.get_procedure(op.id.unwrap());
     let argc = op.count.unwrap();
+    let proc = pr.get_procedure(op.id.unwrap());
 
     proc.execute(argc, st).unwrap();
 }

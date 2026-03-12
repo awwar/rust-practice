@@ -29,8 +29,8 @@ impl Rand {
 }
 
 impl Procedure for Rand {
-    fn support(&self, _node: &Node) -> bool {
-        true
+    fn support(&self, node: &Node) -> bool {
+        node.value.eq("RAND")
     }
 
     fn execute(&self, argc: usize, stack: &mut Stack) -> Result<(), String> {

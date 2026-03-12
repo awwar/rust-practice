@@ -9,6 +9,9 @@ use crate::parser::Node;
 use crate::vm::Stack;
 
 pub trait Procedure {
+    fn debug(&self) -> &str {
+        std::any::type_name::<Self>()
+    }
     fn support(&self, node: &Node) -> bool;
     fn parse(&self, node: Node) -> Result<Node, String> {
         Ok(node)

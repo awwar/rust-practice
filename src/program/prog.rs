@@ -60,14 +60,17 @@ impl Operation {
     pub fn to_string(&self) -> String {
         let mut sb = self.name.to_string();
 
-        if self.word.is_some() {
-            sb.push_str(format!(" {}", self.word.clone().unwrap()).as_str());
-        }
-        if self.value.is_some() {
-            sb.push_str(format!(" {}", self.value.clone().unwrap().repr()).as_str());
+        if self.id.is_some() {
+            sb.push_str(format!(" id: {},", self.id.unwrap().clone()).as_str());
         }
         if self.count.is_some() {
-            sb.push_str(format!(" {}", self.count.unwrap().clone()).as_str());
+            sb.push_str(format!(" count: {},", self.count.unwrap().clone()).as_str());
+        }
+        if self.word.is_some() {
+            sb.push_str(format!(" word: {},", self.word.clone().unwrap()).as_str());
+        }
+        if self.value.is_some() {
+            sb.push_str(format!(" value: {},", self.value.clone().unwrap().repr()).as_str());
         }
 
         sb
@@ -91,16 +94,6 @@ impl Program {
             marks: BTreeMap::new(),
             op_idx: 0
         }
-    }
-    pub fn merge(&mut self, prog: Program) {
-        for mut op in prog.ops {
-            if op.name == EXEC {
-                op.id = Some(op.id.unwrap() + prog.procedures.len() - 1);
-            }
-            self.ops.push(op);
-        }
-
-        self.procedures.extend(prog.procedures);
     }
     pub fn get_procedure(&self, id: usize) -> &Box<dyn Procedure> {
         &self.procedures[id]
@@ -126,9 +119,23 @@ impl Program {
         self.ops.push(Operation::new_count(SKIP, num));
     }
     pub fn new_exec(&mut self, name: String, proc: Box<dyn Procedure>, argc: usize) {
-        self.procedures.push(proc);
+        let mut operation_id: Option<usize> = None;
 
-        self.ops.push(Operation::new_word_count(EXEC, name, self.procedures.len() - 1, argc));
+        // for (i, procedure) in self.procedures.iter().enumerate() {
+        //     if *procedure.debug() == proc.as_ref() {
+        //         operation_id = Some(i);
+        //
+        //         break
+        //     }
+        // }
+
+        if operation_id.is_none() {
+            self.procedures.push(proc);
+
+            operation_id = Some(self.procedures.len() - 1);
+        }
+
+        self.ops.push(Operation::new_word_count(EXEC, name, operation_id.unwrap(), argc));
     }
     pub fn is_end(&self) -> bool {
         self.op_idx > self.ops.len() - 1
@@ -182,7 +189,18 @@ impl Program {
     pub fn to_string(&self) -> String {
         let mut string = String::new();
 
+        string.push_str("-- procedures:\n");
+
         let mut i = 0;
+
+        for proc in &self.procedures {
+            string.push_str(format!("{}: {}\n", i, proc.debug()).as_str());
+            i += 1;
+        }
+
+        i = 0;
+
+        string.push_str("-- ops:\n");
 
         for op in &self.ops {
             string.push_str(format!("{}: {}\n", i, op.to_string()).as_str());

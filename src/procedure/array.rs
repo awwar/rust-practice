@@ -35,7 +35,7 @@ impl Procedure for FillRandom {
             return false;
         }
 
-        true
+        node.value.eq("FILL_RANDOM")
     }
     fn execute(&self, argc: usize, stack: &mut Stack) -> Result<(), String> {
         if argc != 4 {
@@ -60,8 +60,8 @@ impl Procedure for FillRandom {
 pub struct At {}
 
 impl Procedure for At {
-    fn support(&self, _node: &Node) -> bool {
-        true
+    fn support(&self, node: &Node) -> bool {
+        node.value.eq("AT")
     }
 
     fn execute(&self, argc: usize, stack: &mut Stack) -> Result<(), String> {
