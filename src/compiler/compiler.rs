@@ -69,7 +69,7 @@ impl Compiler {
 
             procedure.compile(self, node_copy.clone())?;
         } else if node_type == NodeType::Variable {
-            self.program.new_push(Value::String(node_copy.value.clone()));
+            self.program.new_push_var(node_copy.value.clone());
         } else if node_type == NodeType::Constant || node_type == NodeType::String {
             self.program.new_push(Value::String(node_copy.value.clone()));
         } else if node_type == NodeType::Float {

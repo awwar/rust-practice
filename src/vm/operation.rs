@@ -26,14 +26,16 @@ pub fn mark(pr: &mut Program, _: &mut Stack, _: &mut Memo) {
 pub fn push(pr: &mut Program, st: &mut Stack, mem: &mut Memo) {
     let op = pr.current().unwrap();
 
-    let value = op.value.clone().unwrap().clone();
-    let raw_val = value.repr();
+    if let Some(val) = &op.value {
+        match val {
+            Value::Variable(var) => st.push(mem[*var].clone()),
+            value => st.push(value.clone())
+        }
 
-    if raw_val.starts_with('$') {
-        st.push(mem.get(&raw_val).unwrap().clone());
-    } else {
-        st.push(value);
+        return;
     }
+
+    panic!("invalid op push - expecting value");
 }
 
 pub fn skip(pr: &mut Program, _: &mut Stack, _: &mut Memo) {
@@ -57,16 +59,8 @@ pub fn cskip(pr: &mut Program, st: &mut Stack, _: &mut Memo) {
 pub fn var(pr: &mut Program, st: &mut Stack, mem: &mut Memo) {
     let op = pr.current().unwrap();
 
-    let var_name = op.word.clone().unwrap();
-
-    assert!(
-        !mem.contains_key(&var_name),
-        "variable {var_name} already defined"
-    );
-
-    let operand = st.pop();
-
-    mem.insert(var_name, operand);
+    let Some(Value::Variable(var)) = op.value else {panic!("invalid op var - expecting value")};
+    mem[var] = st.pop();
 }
 
 pub fn get_op_executable(name: &str) -> Executable {

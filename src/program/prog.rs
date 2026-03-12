@@ -81,6 +81,7 @@ pub struct Program {
     ops: Vec<Operation>,
     procedures: Vec<Box<dyn Procedure>>,
     marks: BTreeMap<String, usize>,
+    variables: BTreeMap<String, usize>,
     trace: Vec<usize>,
     op_idx: usize
 }
@@ -92,8 +93,12 @@ impl Program {
             procedures: vec![],
             trace: Vec::with_capacity(255),
             marks: BTreeMap::new(),
+            variables: BTreeMap::new(),
             op_idx: 0
         }
+    }
+    pub fn get_memo_size(&self) -> usize {
+        self.variables.len()
     }
     pub fn get_procedure(&self, id: usize) -> &Box<dyn Procedure> {
         &self.procedures[id]
@@ -106,8 +111,17 @@ impl Program {
     pub fn new_push(&mut self, value: Value) {
         self.ops.push(Operation::new_value(PUSH, value));
     }
+    pub fn new_push_var(&mut self, name: String) {
+        let len = self.variables.len();
+        let v = self.variables.entry(name).or_insert(len);
+
+        self.ops.push(Operation::new_value(PUSH, Value::Variable(v.clone())));
+    }
     pub fn new_var(&mut self, name: String) {
-        self.ops.push(Operation::new_word(VAR, name));
+        let len = self.variables.len();
+        let v = self.variables.entry(name).or_insert(len);
+
+        self.ops.push(Operation::new_value(VAR, Value::Variable(v.clone())));
     }
     pub fn new_jmp(&mut self, name: String) {
         self.ops.push(Operation::new_word(JMP, name));
@@ -187,9 +201,15 @@ impl Program {
     pub fn to_string(&self) -> String {
         let mut string = String::new();
 
-        string.push_str("-- procedures:\n");
+        string.push_str("-- variable:\n");
+
+        for (name, idx) in &self.variables {
+            string.push_str(format!("{}: ${}\n", name, idx).as_str());
+        }
 
         let mut i = 0;
+
+        string.push_str("-- procedures:\n");
 
         for proc in &self.procedures {
             string.push_str(format!("{}: {}\n", i, proc.debug()).as_str());

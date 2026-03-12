@@ -1,5 +1,7 @@
 #[derive(Clone, Debug)]
 pub enum Value {
+    Null,
+    Variable(usize),
     Integer(i64),
     Float(f64),
     Boolean(bool),
@@ -15,7 +17,8 @@ impl Value {
             Value::Boolean(a) => a.to_string(),
             Value::String(a) => a.clone(),
             Value::Array(a) => format!("[{}]", a.iter().map(Value::repr).collect::<Vec<_>>().join(",")),
-            // _ => panic!("unable to int({self:?})")
+            Value::Variable(a) => format!("${}", a),
+            Value::Null => "<null>".to_string(),
         }
     }
     pub fn to_integer(&self) -> Value {

@@ -21,7 +21,7 @@ impl Stack {
     }
 }
 
-pub type Memo = BTreeMap<String, Value>;
+pub type Memo = Vec<Value>;
 
 pub struct VM {
     debug: bool,
@@ -37,7 +37,8 @@ impl VM {
     }
     pub fn execute(&self, pr: &mut Program) {
         let stack = &mut Stack::new();
-        let memo = &mut Memo::new();
+        let memo = &mut Memo::with_capacity(pr.get_memo_size());
+        memo.resize(pr.get_memo_size(), Value::Null);
 
         pr.jump_to_program_begin();
 
@@ -61,7 +62,7 @@ impl VM {
             return;
         }
 
-        thread::sleep(Duration::from_millis(500));
+        thread::sleep(Duration::from_millis(100));
         println!("> {} {}", op.to_string(), stack.len());
     }
 }
