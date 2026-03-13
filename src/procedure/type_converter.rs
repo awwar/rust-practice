@@ -1,4 +1,3 @@
-use crate::parser::Node;
 use crate::procedure::{Procedure, Specification, Type};
 use crate::program::Value;
 use crate::vm::Stack;

@@ -1,5 +1,4 @@
 use crate::procedure::{Procedure, Specification, Type};
-use crate::program::Value;
 use crate::vm::Stack;
 
 pub fn get_procedures() -> Vec<Box<dyn Procedure>> {
