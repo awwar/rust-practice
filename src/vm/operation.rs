@@ -1,19 +1,16 @@
-use crate::program::{OperationName, Program, Value};
+use crate::program::{Operation, OperationName, Program, Value};
 use crate::vm::vm::{Memo, Stack};
 
 pub type Executable = fn(&mut Program, &mut Stack, &mut Memo);
 
 pub fn jmp(pr: &mut Program, _: &mut Stack, _: &mut Memo) {
-    let mark_id = pr.current().unwrap().id.unwrap();
     pr.trace_back();
-    pr.jump_to_mark(mark_id);
+    pr.jump_to_mark(pr.current().id);
 }
 
 pub fn exec(pr: &mut Program, st: &mut Stack, _: &mut Memo) {
-    let op = pr.current().unwrap();
-
-    let argc = op.count.unwrap();
-    let proc = pr.get_procedure(op.id.unwrap());
+    let argc = pr.current().count;
+    let proc = pr.get_procedure(pr.current().id);
 
     proc.execute(argc, st).unwrap();
 }
@@ -24,18 +21,14 @@ pub fn mark(pr: &mut Program, _: &mut Stack, _: &mut Memo) {
 }
 
 pub fn push(pr: &mut Program, st: &mut Stack, mem: &mut Memo) {
-    let op = pr.current().unwrap();
-
-    match &op.value {
+    match &pr.current().value {
         Value::Variable(var) => st.push(mem[*var].clone()),
         value => st.push(value.clone()),
     }
 }
 
 pub fn skip(pr: &mut Program, _: &mut Stack, _: &mut Memo) {
-    let skip = pr.current().unwrap().count.unwrap();
-
-    pr.skip(skip);
+    pr.skip(pr.current().count);
 }
 
 pub fn cskip(pr: &mut Program, st: &mut Stack, _: &mut Memo) {
@@ -44,22 +37,20 @@ pub fn cskip(pr: &mut Program, st: &mut Stack, _: &mut Memo) {
     let condition_result = operand.to_bool().eq(&Value::Boolean(true));
 
     if let Value::Boolean(true) = condition_result {
-        let skip = pr.current().unwrap().count.unwrap();
+        let skip = pr.current().count;
 
         pr.skip(skip);
     }
 }
 
 pub fn var(pr: &mut Program, st: &mut Stack, mem: &mut Memo) {
-    let op = pr.current().unwrap();
-
-    let Value::Variable(var) = op.value else {
-        panic!("invalid op var - expecting value")
+    let Value::Variable(var) = pr.current().value else {
+        panic!("invalid pr.current() var - expecting value")
     };
     mem[var] = st.pop();
 }
 
-pub fn get_op_executable(name: OperationName) -> Executable {
+pub fn get_op_executable(name: &OperationName) -> Executable {
     match name {
         OperationName::PUSH => push,
         OperationName::EXEC => exec,

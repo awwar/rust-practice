@@ -1,8 +1,9 @@
-use std::collections::BTreeMap;
 use crate::procedure::Procedure;
 use crate::program::Value;
+use std::collections::BTreeMap;
+use std::fmt::Display;
+use std::string;
 
-#[derive(Clone)]
 pub enum OperationName {
     PUSH,
     EXEC,
@@ -13,10 +14,25 @@ pub enum OperationName {
     SKIP,
 }
 
+impl Display for OperationName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
+            OperationName::PUSH => "PUSH".to_string(),
+            OperationName::EXEC => "EXEC".to_string(),
+            OperationName::MARK => "MARK".to_string(),
+            OperationName::JMP => "JMP".to_string(),
+            OperationName::VAR => "VAR".to_string(),
+            OperationName::CSKIP => "CSKIP".to_string(),
+            OperationName::SKIP => "SKIP".to_string(),
+        };
+        write!(f, "{}", str)
+    }
+}
+
 pub struct Operation {
     pub name: OperationName,
-    pub count: Option<usize>,
-    pub id: Option<usize>,
+    pub count: usize,
+    pub id: usize,
     pub value: Value,
 }
 
@@ -25,48 +41,40 @@ impl Operation {
         Self {
             name,
             value,
-            id: None,
-            count: None,
+            id: 0,
+            count: 0,
         }
     }
     pub fn new_count(name: OperationName, count: usize) -> Self {
         Self {
             name,
-            count: Some(count),
-            id: None,
+            count,
+            id: 0,
             value: Value::Null,
         }
     }
     pub fn new_word_count(name: OperationName, id: usize, count: usize) -> Self {
         Self {
             name,
-            count: Some(count),
-            id: Some(id),
+            count,
+            id,
             value: Value::Null,
         }
     }
     pub fn new_id(name: OperationName, id: usize) -> Self {
         Self {
             name,
-            count: None,
-            id: Some(id),
+            count: 0,
+            id,
             value: Value::Null,
         }
     }
     pub fn to_string(&self) -> String {
-        // let mut sb = self.name.to_string();
+        let mut sb = self.name.to_string();
 
-        let mut sb = String::new();
-
-        if self.id.is_some() {
-            sb.push_str(format!(" id: {},", self.id.unwrap().clone()).as_str());
-        }
-        if self.count.is_some() {
-            sb.push_str(format!(" count: {},", self.count.unwrap().clone()).as_str());
-        }
-        if self.value.repr() != "<null>" {
-            sb.push_str(format!(" value: {},", self.value.repr()).as_str());
-        }
+        sb.push_str(format!(" id: {},", self.id.clone()).as_str());
+        sb.push_str(format!(" count: {},", self.count.clone()).as_str());
+        sb.push_str(format!(" value: {}", self.value.repr()).as_str());
 
         sb
     }
@@ -112,19 +120,26 @@ impl Program {
         self.marks[*v] = self.ops.len() - 1;
     }
     pub fn new_push(&mut self, value: Value) {
-        self.ops.push(Operation::new_value(OperationName::PUSH, value));
+        self.ops
+            .push(Operation::new_value(OperationName::PUSH, value));
     }
     pub fn new_push_var(&mut self, name: String) {
         let len = self.variables_map.len();
         let v = self.variables_map.entry(name).or_insert(len);
 
-        self.ops.push(Operation::new_value(OperationName::PUSH, Value::Variable(*v)));
+        self.ops.push(Operation::new_value(
+            OperationName::PUSH,
+            Value::Variable(*v),
+        ));
     }
     pub fn new_var(&mut self, name: String) {
         let len = self.variables_map.len();
         let v = self.variables_map.entry(name).or_insert(len);
 
-        self.ops.push(Operation::new_value(OperationName::VAR, Value::Variable(*v)));
+        self.ops.push(Operation::new_value(
+            OperationName::VAR,
+            Value::Variable(*v),
+        ));
     }
     pub fn new_jmp(&mut self, name: String) {
         let len = self.marks_map.len();
@@ -133,10 +148,12 @@ impl Program {
         self.ops.push(Operation::new_id(OperationName::JMP, *v));
     }
     pub fn new_cskip(&mut self, num: usize) {
-        self.ops.push(Operation::new_count(OperationName::CSKIP, num));
+        self.ops
+            .push(Operation::new_count(OperationName::CSKIP, num));
     }
     pub fn new_skip(&mut self, num: usize) {
-        self.ops.push(Operation::new_count(OperationName::SKIP, num));
+        self.ops
+            .push(Operation::new_count(OperationName::SKIP, num));
     }
     pub fn new_exec(&mut self, proc: Box<dyn Procedure>, argc: usize) {
         let mut operation_id: Option<usize> = None;
@@ -149,7 +166,11 @@ impl Program {
             operation_id = Some(self.procedures.len() - 1);
         }
 
-        self.ops.push(Operation::new_word_count(OperationName::EXEC, operation_id.unwrap(), argc));
+        self.ops.push(Operation::new_word_count(
+            OperationName::EXEC,
+            operation_id.unwrap(),
+            argc,
+        ));
     }
     pub fn is_end(&self) -> bool {
         self.op_idx > self.ops.len() - 1
@@ -160,21 +181,19 @@ impl Program {
             None => self.ops.len(),
         };
     }
-    pub fn next(&mut self) {
+    pub fn next(&mut self) -> bool {
         self.op_idx += 1;
 
         if !self.is_end() {
-            return;
+            return true;
         }
 
         self.finish_block();
-    }
-    pub fn current(&self) -> Option<&Operation> {
-        if self.is_end() {
-            return None;
-        }
 
-        self.ops.get(self.op_idx)
+        !self.is_end()
+    }
+    pub fn current(&self) -> &Operation {
+        unsafe { self.ops.get_unchecked(self.op_idx) }
     }
     pub fn trace_back(&mut self) {
         self.trace.push(self.op_idx + 1);

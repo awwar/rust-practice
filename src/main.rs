@@ -2,7 +2,6 @@ mod compiler;
 mod parser;
 mod lexer;
 mod program;
-mod util;
 mod procedure;
 mod vm;
 mod control_structures;

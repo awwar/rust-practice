@@ -243,8 +243,8 @@ impl Parser {
         Ok(Node::new_constant(next_token.value, self.current_position))
     }
 
-    fn error(&self, position: usize, message: &str) -> String {
-        crate::util::new_error(position, String::new(), message)
+    fn error(&self, _: usize, message: &str) -> String {
+        message.to_string()
     }
 
     fn prioritize(&self, input_list: Vec<Node>) -> Vec<Node> {

@@ -42,17 +42,15 @@ impl VM {
         pr.jump_to_program_begin();
 
         loop {
-            pr.next();
-
-            if let Some(op) = pr.current() {
-                self.debug(op, stack);
-
-                get_op_executable(op.name.clone())(pr, stack, memo);
-
-                continue;
+            if !pr.next() {
+                break;
             }
 
-            break;
+            let op = pr.current();
+
+            // self.debug(op, stack);
+
+            get_op_executable(&op.name)(pr, stack, memo);
         }
     }
 
