@@ -12,10 +12,10 @@ pub enum Value {
 impl Value {
     pub fn repr(&self) -> String {
         match self {
-            Value::Integer(a) => format!("{}i", a),
-            Value::Float(a) => format!("{}f", a),
-            Value::Boolean(a) => format!("<{}>", a),
-            Value::String(a) => format!("\"{}\"", a),
+            Value::Integer(a) => format!("{a}i"),
+            Value::Float(a) => format!("{a}f"),
+            Value::Boolean(a) => format!("<{a}>"),
+            Value::String(a) => format!("\"{a}\""),
             Value::Array(a) => format!("[{}]", a.iter().map(Value::repr).collect::<Vec<_>>().join(",")),
             Value::Variable(a) => format!("${a}"),
             Value::Null => "<null>".to_string(),
