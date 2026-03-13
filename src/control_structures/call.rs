@@ -20,7 +20,7 @@ impl ControlStructures for Call {
         if !node.is_flow_link_word() {
             let proc = get_procedures(&node.clone());
 
-            node = proc.parse(node)?;
+            node = proc.spec().parse(node)?;
         }
 
         Ok(Node::new_operation(token.value, vec![node, variable], token.at))

@@ -1,5 +1,5 @@
 use crate::parser::Node;
-use crate::procedure::{Procedure};
+use crate::procedure::{Procedure, Specification, Type};
 use crate::program::Value;
 use crate::vm::Stack;
 
@@ -22,8 +22,12 @@ pub struct Expression {
 }
 
 impl Procedure for Expression {
-    fn support(&self, node: &Node) -> bool {
-        node.value.eq(self.v)
+    fn spec(&self) -> Specification {
+        Specification{
+            method_name: self.v,
+            args: vec![Type::Any, Type::Any],
+            return_type: Type::Any
+        }
     }
     fn execute(&self, argc: usize, stack: &mut Stack) -> Result<(), String> {
         assert_eq!(argc, 2, "Procedure expects 2 arguments");

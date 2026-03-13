@@ -1,4 +1,4 @@
-use crate::program::{Operation, OperationName, Program, Value};
+use crate::program::{OperationName, Program, Value};
 use crate::vm::vm::{Memo, Stack};
 
 pub type Executable = fn(&mut Program, &mut Stack, &mut Memo);

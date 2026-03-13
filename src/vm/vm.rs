@@ -1,5 +1,5 @@
 use crate::program::{Operation, Program, Value};
-use crate::vm::operation::{get_op_executable};
+use crate::vm::operation::get_op_executable;
 use std::time::Duration;
 use std::{env, thread};
 
@@ -28,10 +28,10 @@ pub struct VM {
 
 impl VM {
     pub fn new() -> VM {
-        let debug = env::var("DEBUG").unwrap_or_else(|_e| "0".to_string());
-
         VM {
-            debug: debug.eq("1") || debug.eq("true")
+            debug: env::var("DEBUG")
+                .unwrap_or_else(|_e| "0".to_string())
+                .eq("1"),
         }
     }
     pub fn execute(&self, pr: &mut Program) {
@@ -48,7 +48,7 @@ impl VM {
 
             let op = pr.current();
 
-            // self.debug(op, stack);
+            self.debug(op, stack);
 
             get_op_executable(&op.name)(pr, stack, memo);
         }

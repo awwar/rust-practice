@@ -36,9 +36,9 @@ fn main() {
     let vm = VM::new();
     let now = Instant::now();
 
-    for _ in 0..1_000_000 {
+    for _ in 0..1 {
         vm.execute(prog);
     }
 
-    println!("{}ms", now.elapsed().as_millis());
+    println!("{}ms {}ns", now.elapsed().as_millis(), now.elapsed().as_nanos());
 }

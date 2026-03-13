@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
-use crate::procedure::Procedure;
+use crate::procedure::{Procedure, Specification, Type};
 use crate::program::Value;
 use crate::vm::Stack;
 use rand::{Rng, RngExt};
@@ -29,10 +29,13 @@ impl Rand {
 }
 
 impl Procedure for Rand {
-    fn support(&self, node: &Node) -> bool {
-        node.value.eq("RAND")
+    fn spec(&self) -> Specification {
+        Specification{
+            method_name: "RAND",
+            args: vec![],
+            return_type: Type::Float
+        }
     }
-
     fn execute(&self, argc: usize, stack: &mut Stack) -> Result<(), String> {
         if argc != 0 {
             return Err(String::from("argument count must be zero"));

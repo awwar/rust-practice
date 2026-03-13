@@ -1,11 +1,10 @@
-use crate::procedure::Procedure;
+use crate::procedure::{Procedure, Specification, Type};
 use crate::program::Value;
 use crate::vm::Stack;
 use rand::prelude::SmallRng;
 use rand::{Rng, RngExt, SeedableRng};
 use std::cell::RefCell;
 use std::rc::Rc;
-use crate::parser::Node;
 
 pub fn get_procedures() -> Vec<Box<dyn Procedure>> {
     vec![
@@ -30,12 +29,12 @@ impl FillRandom {
 
 // FILL_RANDOM ($INITIAL_VALUE, 10, -100, 100) $FILLED_VALUE
 impl Procedure for FillRandom {
-    fn support(&self, node: &Node) -> bool {
-        if node.params.len() != 4 {
-            return false;
+    fn spec(&self) -> Specification {
+        Specification{
+            method_name: "FILL_RANDOM",
+            args: vec![Type::Array(Box::new(Type::Integer)), Type::Integer, Type::Integer, Type::Integer],
+            return_type: Type::Array(Box::new(Type::Integer))
         }
-
-        node.value.eq("FILL_RANDOM")
     }
     fn execute(&self, argc: usize, stack: &mut Stack) -> Result<(), String> {
         if argc != 4 {
@@ -60,10 +59,13 @@ impl Procedure for FillRandom {
 pub struct At {}
 
 impl Procedure for At {
-    fn support(&self, node: &Node) -> bool {
-        node.value.eq("AT")
+    fn spec(&self) -> Specification {
+        Specification{
+            method_name: "AT",
+            args: vec![Type::Array(Box::from(Type::Any)), Type::Integer],
+            return_type: Type::Any
+        }
     }
-
     fn execute(&self, argc: usize, stack: &mut Stack) -> Result<(), String> {
         if argc != 2 {
             return Err(String::from("argument count must be 2"));

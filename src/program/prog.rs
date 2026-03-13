@@ -2,7 +2,6 @@ use crate::procedure::Procedure;
 use crate::program::Value;
 use std::collections::BTreeMap;
 use std::fmt::Display;
-use std::string;
 
 pub enum OperationName {
     PUSH,
@@ -25,7 +24,7 @@ impl Display for OperationName {
             OperationName::CSKIP => "CSKIP".to_string(),
             OperationName::SKIP => "SKIP".to_string(),
         };
-        write!(f, "{}", str)
+        write!(f, "{str}")
     }
 }
 
@@ -158,7 +157,13 @@ impl Program {
     pub fn new_exec(&mut self, proc: Box<dyn Procedure>, argc: usize) {
         let mut operation_id: Option<usize> = None;
 
-        //ToDo: try to find
+        for (i, procedure) in self.procedures.iter().enumerate() {
+            if proc.spec().debug().eq(&procedure.spec().debug()) {
+                operation_id = Some(i);
+
+                break;
+            }
+        }
 
         if operation_id.is_none() {
             self.procedures.push(proc);
@@ -214,6 +219,12 @@ impl Program {
     pub fn to_string(&self) -> String {
         let mut string = String::new();
 
+        string.push_str("-- marks:\n");
+
+        for (name, idx) in &self.marks_map {
+            string.push_str(format!("{name}: {}\n", self.marks[*idx]).as_str());
+        }
+
         string.push_str("-- variable:\n");
 
         for (name, idx) in &self.variables_map {
@@ -225,7 +236,7 @@ impl Program {
         string.push_str("-- procedures:\n");
 
         for proc in &self.procedures {
-            string.push_str(format!("{}: {}\n", i, proc.debug()).as_str());
+            string.push_str(format!("{}: {}\n", i, proc.spec().debug()).as_str());
             i += 1;
         }
 
