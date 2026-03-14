@@ -24,11 +24,11 @@ impl Procedure for Expression {
     fn spec(&self) -> Specification {
         Specification{
             method_name: self.v,
-            args: vec![Type::Any, Type::Any],
-            return_type: Type::Any
+            args: vec![&Type::Any(1), &Type::Any(1)],
+            return_type: &Type::Any(1)
         }
     }
-    fn execute(&self, argc: usize, stack: &mut Stack) -> Result<(), String> {
+    fn execute(&self, argc: usize, stack: &mut Stack) {
         assert_eq!(argc, 2, "Procedure expects 2 arguments");
 
         let second_operand = stack.pop();
@@ -37,7 +37,5 @@ impl Procedure for Expression {
         let new_value = (self.op)(&first_operand, &second_operand);
 
         stack.push(new_value);
-
-        Ok(())
     }
 }

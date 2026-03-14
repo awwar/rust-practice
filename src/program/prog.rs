@@ -8,7 +8,7 @@ pub enum OperationName {
     EXEC,
     MARK,
     JMP,
-    VAR,
+    HEAP,
     CSKIP,
     SKIP,
 }
@@ -20,7 +20,7 @@ impl Display for OperationName {
             OperationName::EXEC => "EXEC".to_string(),
             OperationName::MARK => "MARK".to_string(),
             OperationName::JMP => "JMP".to_string(),
-            OperationName::VAR => "VAR".to_string(),
+            OperationName::HEAP => "HEAP".to_string(),
             OperationName::CSKIP => "CSKIP".to_string(),
             OperationName::SKIP => "SKIP".to_string(),
         };
@@ -131,12 +131,12 @@ impl Program {
             Value::Variable(*v),
         ));
     }
-    pub fn new_var(&mut self, name: String) {
+    pub fn new_heap(&mut self, name: String) {
         let len = self.variables_map.len();
         let v = self.variables_map.entry(name).or_insert(len);
 
         self.ops.push(Operation::new_value(
-            OperationName::VAR,
+            OperationName::HEAP,
             Value::Variable(*v),
         ));
     }

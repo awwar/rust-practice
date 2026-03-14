@@ -32,16 +32,12 @@ impl Procedure for Rand {
         Specification{
             method_name: "RAND",
             args: vec![],
-            return_type: Type::Float
+            return_type: &Type::Float
         }
     }
-    fn execute(&self, argc: usize, stack: &mut Stack) -> Result<(), String> {
-        if argc != 0 {
-            return Err(String::from("argument count must be zero"));
-        }
+    fn execute(&self, argc: usize, stack: &mut Stack) {
+        assert_eq!(argc, 0, "Procedure expects 0 arguments");
 
         stack.push(Value::Float(self.rng.borrow_mut().random::<f64>()));
-
-        Ok(())
     }
 }

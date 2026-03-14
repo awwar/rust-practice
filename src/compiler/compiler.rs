@@ -37,7 +37,7 @@ impl Compiler {
                     break;
                 }
                 self.sub_compile(child.params.first().unwrap().clone())?;
-                self.program.new_var(child.params.last().unwrap().value.clone());
+                self.program.new_heap(child.params.last().unwrap().value.clone());
             }
 
             for child in node_copy.params.iter().skip(from_param) {

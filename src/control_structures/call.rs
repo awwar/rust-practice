@@ -41,7 +41,7 @@ impl ControlStructures for Call {
         let var_name = node.params.last().unwrap().value.clone();
 
         if !var_name.eq("$_") {
-            sc.program.new_var(var_name);
+            sc.program.new_heap(var_name);
         }
 
         Ok(())

@@ -32,14 +32,12 @@ impl Procedure for FillRandom {
     fn spec(&self) -> Specification {
         Specification{
             method_name: "FILL_RANDOM",
-            args: vec![Type::Array(Box::new(Type::Integer)), Type::Integer, Type::Integer, Type::Integer],
-            return_type: Type::Array(Box::new(Type::Integer))
+            args: vec![&Type::Array(&Type::Integer), &Type::Integer, &Type::Integer, &Type::Integer],
+            return_type: &Type::Array(&Type::Integer)
         }
     }
-    fn execute(&self, argc: usize, stack: &mut Stack) -> Result<(), String> {
-        if argc != 4 {
-            return Err(String::from("argument count must be 4"));
-        }
+    fn execute(&self, argc: usize, stack: &mut Stack) {
+        assert_eq!(argc, 4, "Procedure expects 4 arguments");
 
         let Value::Integer(max) = stack.pop() else { todo!() };
         let Value::Integer(min) = stack.pop() else { todo!() };
@@ -51,8 +49,6 @@ impl Procedure for FillRandom {
         new_val.extend(addition);
 
         stack.push(Value::Array(new_val));
-
-        Ok(())
     }
 }
 
@@ -62,21 +58,17 @@ impl Procedure for At {
     fn spec(&self) -> Specification {
         Specification{
             method_name: "AT",
-            args: vec![Type::Array(Box::from(Type::Any)), Type::Integer],
-            return_type: Type::Any
+            args: vec![&Type::Array(&Type::Any(1)), &Type::Integer],
+            return_type: &Type::Any(1)
         }
     }
-    fn execute(&self, argc: usize, stack: &mut Stack) -> Result<(), String> {
-        if argc != 2 {
-            return Err(String::from("argument count must be 2"));
-        }
+    fn execute(&self, argc: usize, stack: &mut Stack) {
+        assert_eq!(argc, 2, "Procedure expects 2 arguments");
 
         let Value::Integer(count) = stack.pop() else { todo!() };
         let Value::Array(array) = stack.pop() else { todo!() };
         let val: Value = (array)[count as usize].clone();
 
         stack.push(val);
-
-        Ok(())
     }
 }

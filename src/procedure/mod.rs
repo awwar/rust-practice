@@ -9,14 +9,14 @@ use crate::parser::Node;
 use crate::vm::Stack;
 
 pub enum Type {
-    Array(Box<Type>),
+    Array(&'static Type),
     Integer,
     Float,
     String,
     Bool,
     Null,
     None,
-    Any,
+    Any(u8),
 }
 
 impl Type {
@@ -29,23 +29,28 @@ impl Type {
             Type::Bool => "<bool>".to_string(),
             Type::Null => "<null>".to_string(),
             Type::None => "<none>".to_string(),
-            Type::Any => "<any>".to_string(),
+            Type::Any(index) => format!("<any {}>", index),
         }
     }
 }
 
 pub struct Specification {
     method_name: &'static str,
-    args: Vec<Type>,
-    return_type: Type,
+    args: Vec<&'static Type>,
+    return_type: &'static Type,
 }
 
 impl Specification {
     pub fn support(&self, node: &Node) -> bool {
-        node.value
-            .to_uppercase()
-            .eq(self.method_name.to_uppercase().as_str())
-            && node.params.len() == self.args.len()
+        if node.value.to_uppercase().ne(self.method_name.to_uppercase().as_str()) {
+            return false;
+        }
+
+        if node.params.len() != self.args.len() {
+            return false;
+        }
+
+        true
     }
     pub fn debug(&self) -> String {
         format!(
@@ -53,7 +58,7 @@ impl Specification {
             self.method_name,
             self.args
                 .iter()
-                .map(Type::repr)
+                .map(|v: &&Type|Type::repr(*v))
                 .collect::<Vec<_>>()
                 .join(", "),
             self.return_type.repr(),
@@ -77,7 +82,7 @@ pub trait Procedure {
 
         Ok(())
     }
-    fn execute(&self, _argc: usize, _stack: &mut Stack) -> Result<(), String>;
+    fn execute(&self, _argc: usize, _stack: &mut Stack);
 }
 
 pub fn get_procedures(node: &Node) -> Box<dyn Procedure> {
@@ -94,5 +99,5 @@ pub fn get_procedures(node: &Node) -> Box<dyn Procedure> {
         }
     }
 
-    panic!("Unable to find procedure");
+    panic!("Unable to find procedure for {} with {} params", node.value, node.params.len());
 }

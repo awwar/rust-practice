@@ -49,16 +49,21 @@ impl TokenStream {
 
         TokenStream { tokens }
     }
-    pub fn get(&mut self, i: usize) -> Option<Token> {
+    pub fn get(&mut self, i: usize) -> Result<Token, String> {
         let candidate = self.tokens.get(i);
 
         if candidate.is_some() {
-            return Some(candidate.unwrap().clone());
+            return Ok(candidate.unwrap().clone());
         }
 
-        None
+        Err(format!("unable to find token at {:?}", i))
     }
-    pub fn search_idx_of_closed_bracer(&mut self, mut current_position: usize) -> Option<usize> {
+    pub fn has(&mut self, i: usize) -> bool {
+        self.tokens.get(i).is_some()
+    }
+    pub fn search_idx_of_closed_bracer(&mut self, mut current_position: usize) -> Result<usize, String> {
+        let start_token = self.get(current_position)?;
+
         let mut counts = 0;
 
         while let Some(token) = self.tokens.get(current_position) {
@@ -69,13 +74,13 @@ impl TokenStream {
             }
 
             if counts == 0 {
-                return Some(current_position);
+                return Ok(current_position);
             }
 
             current_position += 1;
         }
 
-        None
+        Err(format!("unable to find token at {:?}", start_token.at))
     }
 }
 

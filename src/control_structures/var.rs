@@ -20,7 +20,7 @@ impl ControlStructures for Var {
         let var_name = node.params.first().unwrap().value.clone();
 
         if !var_name.eq("$_") {
-            sc.program.new_var(var_name);
+            sc.program.new_heap(var_name);
         }
 
         Ok(())

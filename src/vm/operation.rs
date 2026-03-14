@@ -9,10 +9,10 @@ pub fn jmp(pr: &mut Program, _: &mut Stack, _: &mut Memo) {
 }
 
 pub fn exec(pr: &mut Program, st: &mut Stack, _: &mut Memo) {
-    let argc = pr.current().count;
-    let proc = pr.get_procedure(pr.current().id);
+    let op = pr.current();
+    let proc = pr.get_procedure(op.id);
 
-    proc.execute(argc, st).unwrap();
+    proc.execute(op.count, st);
 }
 
 pub fn mark(pr: &mut Program, _: &mut Stack, _: &mut Memo) {
@@ -34,16 +34,18 @@ pub fn skip(pr: &mut Program, _: &mut Stack, _: &mut Memo) {
 pub fn cskip(pr: &mut Program, st: &mut Stack, _: &mut Memo) {
     let operand = st.pop();
 
-    let condition_result = operand.to_bool().eq(&Value::Boolean(true));
+    let Value::Bool(cond) = operand else {
+        panic!("cskip condition must be a bool");
+    };
 
-    if let Value::Boolean(true) = condition_result {
+    if cond == true {
         let skip = pr.current().count;
 
         pr.skip(skip);
     }
 }
 
-pub fn var(pr: &mut Program, st: &mut Stack, mem: &mut Memo) {
+pub fn heap(pr: &mut Program, st: &mut Stack, mem: &mut Memo) {
     let Value::Variable(var) = pr.current().value else {
         panic!("invalid pr.current() var - expecting value")
     };
@@ -56,7 +58,7 @@ pub fn get_op_executable(name: &OperationName) -> Executable {
         OperationName::EXEC => exec,
         OperationName::MARK => mark,
         OperationName::JMP => jmp,
-        OperationName::VAR => var,
+        OperationName::HEAP => heap,
         OperationName::CSKIP => cskip,
         OperationName::SKIP => skip,
     }
