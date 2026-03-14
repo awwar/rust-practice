@@ -38,7 +38,7 @@ pub fn cskip(pr: &mut Program, st: &mut Stack, _: &mut Memo) {
         panic!("cskip condition must be a bool");
     };
 
-    if cond == true {
+    if cond {
         let skip = pr.current().count;
 
         pr.skip(skip);

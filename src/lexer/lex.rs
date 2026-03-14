@@ -56,7 +56,7 @@ impl TokenStream {
             return Ok(candidate.unwrap().clone());
         }
 
-        Err(format!("unable to find token at {:?}", i))
+        Err(format!("unable to find token at {i:?}"))
     }
     pub fn has(&mut self, i: usize) -> bool {
         self.tokens.get(i).is_some()

@@ -29,7 +29,7 @@ impl Type {
             Type::Bool => "<bool>".to_string(),
             Type::Null => "<null>".to_string(),
             Type::None => "<none>".to_string(),
-            Type::Any(index) => format!("<any {}>", index),
+            Type::Any(index) => format!("<any {index}>"),
         }
     }
 }
@@ -58,7 +58,7 @@ impl Specification {
             self.method_name,
             self.args
                 .iter()
-                .map(|v: &&Type|Type::repr(*v))
+                .map(|v: &&Type|Type::repr(v))
                 .collect::<Vec<_>>()
                 .join(", "),
             self.return_type.repr(),

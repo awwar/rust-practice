@@ -171,7 +171,7 @@ impl Parser {
                 TokenName::Bracket => {
                     self.current_position -= 1;
                     let sub_node = self.subparse_one_in_bracers()?;
-                    list.push(sub_node.clone_with_priority(0))
+                    list.push(sub_node.clone_with_priority(0));
                 }
                 TokenName::Operator => {
                     list.push(Node::new_operation(token.value, vec![], token.at));
