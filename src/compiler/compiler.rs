@@ -65,21 +65,27 @@ impl Compiler {
         let node_copy = node.clone();
         let node_type: NodeType = node.node_type;
 
-        if node_type == NodeType::Operation {
-            let procedure = get_procedures(&node_copy);
+        match node_type {
+            NodeType::Operation => {
+                let procedure = get_procedures(&node_copy);
 
-            procedure.compile(self, node_copy.clone())?;
-        } else if node_type == NodeType::Variable {
-            self.program.new_push_var(node_copy.value.clone());
-        } else if node_type == NodeType::Constant || node_type == NodeType::String {
-            self.program
-                .new_push(Value::String(node_copy.value.clone()));
-        } else if node_type == NodeType::Float {
-            self.program
-                .new_push(Value::Float(node_copy.value.parse::<f64>().unwrap()));
-        } else if node_type == NodeType::Integer {
-            self.program
-                .new_push(Value::Integer(node_copy.value.parse::<i64>().unwrap()));
+                procedure.compile(self, node_copy.clone())?;
+            },
+            NodeType::Variable => {
+                self.program.new_push_var(node_copy.value.clone());
+            },
+            NodeType::Constant | NodeType::String => {
+                self.program.new_push(Value::String(node_copy.value.clone()));
+            },
+            NodeType::Float => {
+                self.program.new_push(Value::Float(node_copy.value.parse::<f64>().unwrap()));
+            },
+            NodeType::Integer => {
+                self.program.new_push(Value::Integer(node_copy.value.parse::<i64>().unwrap()));
+            },
+            _ => {
+                return Err(format!("Invalid node type for sub compile: {node_type:?}"))
+            }
         }
 
         Ok(())

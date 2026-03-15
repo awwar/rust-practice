@@ -30,15 +30,16 @@ pub fn get_op_executable(name: &OperationName) -> Executable {
 impl Display for OperationName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = match self {
-            OperationName::PUSH => "PUSH".to_string(),
-            OperationName::EXEC => "EXEC".to_string(),
-            OperationName::MARK => "MARK".to_string(),
-            OperationName::JMP => "JMP".to_string(),
-            OperationName::HEAP => "HEAP".to_string(),
-            OperationName::CSKIP => "CSKIP".to_string(),
-            OperationName::SKIP => "SKIP".to_string(),
+            OperationName::PUSH => "PUSH",
+            OperationName::EXEC => "EXEC",
+            OperationName::MARK => "MARK",
+            OperationName::JMP => "JMP",
+            OperationName::HEAP => "HEAP",
+            OperationName::CSKIP => "CSKIP",
+            OperationName::SKIP => "SKIP",
         };
-        write!(f, "{str}")
+
+        f.write_str(str)
     }
 }
 
@@ -82,14 +83,17 @@ impl Operation {
             value: Value::Null,
         }
     }
-    pub fn to_string(&self) -> String {
+}
+
+impl Display for Operation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut sb = self.name.to_string();
 
         sb.push_str(format!(" id: {},", self.id.clone()).as_str());
         sb.push_str(format!(" count: {},", self.count.clone()).as_str());
         sb.push_str(format!(" value: {}", self.value.repr()).as_str());
 
-        sb
+        f.write_str(sb.as_str())
     }
 }
 
@@ -139,5 +143,6 @@ fn heap(pr: &mut Program, st: &mut Stack, mem: &mut Memo) {
     let Value::Variable(var) = pr.current().value else {
         panic!("invalid pr.current() var - expecting value")
     };
+
     mem[var] = st.pop();
 }
