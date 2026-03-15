@@ -1,7 +1,7 @@
 use crate::control_structures::get_control_structures;
 use crate::parser::{Node, NodeType};
 use crate::procedure::get_procedures;
-use crate::program::{Program, Value};
+use crate::vm::{Program, Value};
 
 pub struct Compiler {
     pub program: Program,

@@ -1,5 +1,5 @@
 use crate::procedure::{Procedure, Specification, Type};
-use crate::program::Value;
+use crate::vm::Value;
 use crate::vm::Stack;
 use rand::prelude::SmallRng;
 use rand::{Rng, RngExt, SeedableRng};

@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 use crate::procedure::{Procedure, Specification, Type};
-use crate::program::Value;
+use crate::vm::Value;
 use crate::vm::Stack;
 use rand::{Rng, RngExt};
 use rand::rngs::SmallRng;

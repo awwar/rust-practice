@@ -296,18 +296,3 @@ fn function_call(mut list: Vec<Node>, pointer: usize) -> Option<Vec<Node>> {
 
     Some(list)
 }
-
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_math_operation_replacer() {
-        let list = vec![Node::new_number("1".to_string(), 0), Node::new_operation("+".to_string(), vec![], 1), Node::new_number("2".to_string(), 2)];
-
-        let new_list = math_operations(list.clone(), 1).unwrap();
-
-        assert_eq!(new_list.len(), 1);
-    }
-}

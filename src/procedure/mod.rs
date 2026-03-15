@@ -14,7 +14,6 @@ pub enum Type {
     Float,
     String,
     Bool,
-    Null,
     None,
     Any(u8),
 }
@@ -27,7 +26,6 @@ impl Type {
             Type::Float => "<float>".to_string(),
             Type::String => "<string>".to_string(),
             Type::Bool => "<bool>".to_string(),
-            Type::Null => "<null>".to_string(),
             Type::None => "<none>".to_string(),
             Type::Any(index) => format!("<any {index}>"),
         }
