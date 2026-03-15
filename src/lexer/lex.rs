@@ -50,10 +50,8 @@ impl TokenStream {
         TokenStream { tokens }
     }
     pub fn get(&mut self, i: usize) -> Result<Token, String> {
-        let candidate = self.tokens.get(i);
-
-        if candidate.is_some() {
-            return Ok(candidate.unwrap().clone());
+        if let Some(token) = self.tokens.get(i) {
+            return Ok(token.clone());
         }
 
         Err(format!("unable to find token at {i:?}"))

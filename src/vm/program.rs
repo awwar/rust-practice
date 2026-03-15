@@ -35,7 +35,7 @@ impl Program {
         let len = self.marks_map.len();
         let v = self.marks_map.entry(name).or_insert(len);
 
-        self.ops.push(Operation::new_id(OperationName::MARK, *v));
+        self.ops.push(Operation::new_id(OperationName::Mark, *v));
 
         if self.marks.len() < *v {
             self.marks.resize(*v + 1, 0);
@@ -44,14 +44,14 @@ impl Program {
     }
     pub fn new_push(&mut self, value: Value) {
         self.ops
-            .push(Operation::new_value(OperationName::PUSH, value));
+            .push(Operation::new_value(OperationName::Push, value));
     }
     pub fn new_push_var(&mut self, name: String) {
         let len = self.variables_map.len();
         let v = self.variables_map.entry(name).or_insert(len);
 
         self.ops.push(Operation::new_value(
-            OperationName::PUSH,
+            OperationName::Push,
             Value::Variable(*v),
         ));
     }
@@ -60,7 +60,7 @@ impl Program {
         let v = self.variables_map.entry(name).or_insert(len);
 
         self.ops.push(Operation::new_value(
-            OperationName::HEAP,
+            OperationName::Heap,
             Value::Variable(*v),
         ));
     }
@@ -68,15 +68,15 @@ impl Program {
         let len = self.marks_map.len();
         let v = self.marks_map.entry(name).or_insert(len);
 
-        self.ops.push(Operation::new_id(OperationName::JMP, *v));
+        self.ops.push(Operation::new_id(OperationName::Jmp, *v));
     }
     pub fn new_cskip(&mut self, num: usize) {
         self.ops
-            .push(Operation::new_count(OperationName::CSKIP, num));
+            .push(Operation::new_count(OperationName::Cskip, num));
     }
     pub fn new_skip(&mut self, num: usize) {
         self.ops
-            .push(Operation::new_count(OperationName::SKIP, num));
+            .push(Operation::new_count(OperationName::Skip, num));
     }
     pub fn new_exec(&mut self, proc: Box<dyn Procedure>, argc: usize) {
         let mut operation_id: Option<usize> = None;
@@ -96,7 +96,7 @@ impl Program {
         }
 
         self.ops.push(Operation::new_word_count(
-            OperationName::EXEC,
+            OperationName::Exec,
             operation_id.unwrap(),
             argc,
         ));
@@ -169,7 +169,7 @@ impl Program {
         string.push_str("-- ops:\n");
 
         for op in &self.ops {
-            string.push_str(format!("{}: {}\n", i, op.to_string()).as_str());
+            string.push_str(format!("{i}: {op}\n").as_str());
             i += 1;
         }
 

@@ -6,37 +6,37 @@ use std::fmt::Display;
 pub type Executable = fn(&mut Program, &mut Stack, &mut Memo);
 
 pub enum OperationName {
-    PUSH,
-    EXEC,
-    MARK,
-    JMP,
-    HEAP,
-    CSKIP,
-    SKIP,
+    Push,
+    Exec,
+    Mark,
+    Jmp,
+    Heap,
+    Cskip,
+    Skip,
 }
 
 pub fn get_op_executable(name: &OperationName) -> Executable {
     match name {
-        OperationName::PUSH => push,
-        OperationName::EXEC => exec,
-        OperationName::MARK => mark,
-        OperationName::JMP => jmp,
-        OperationName::HEAP => heap,
-        OperationName::CSKIP => cskip,
-        OperationName::SKIP => skip,
+        OperationName::Push => push,
+        OperationName::Exec => exec,
+        OperationName::Mark => mark,
+        OperationName::Jmp => jmp,
+        OperationName::Heap => heap,
+        OperationName::Cskip => cskip,
+        OperationName::Skip => skip,
     }
 }
 
 impl Display for OperationName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = match self {
-            OperationName::PUSH => "PUSH",
-            OperationName::EXEC => "EXEC",
-            OperationName::MARK => "MARK",
-            OperationName::JMP => "JMP",
-            OperationName::HEAP => "HEAP",
-            OperationName::CSKIP => "CSKIP",
-            OperationName::SKIP => "SKIP",
+            OperationName::Push => "PUSH",
+            OperationName::Exec => "EXEC",
+            OperationName::Mark => "MARK",
+            OperationName::Jmp => "JMP",
+            OperationName::Heap => "HEAP",
+            OperationName::Cskip => "CSKIP",
+            OperationName::Skip => "SKIP",
         };
 
         f.write_str(str)

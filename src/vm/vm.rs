@@ -1,5 +1,4 @@
-use crate::vm::{get_op_executable, Operation};
-use crate::vm::{Program, Value};
+use crate::vm::{get_op_executable, Operation, Program, Value};
 use std::time::Duration;
 use std::{env, thread};
 
@@ -60,6 +59,6 @@ impl VM {
         }
 
         thread::sleep(Duration::from_millis(200));
-        println!("> {} {}", op.to_string(), stack.len());
+        println!("> {} {}", op, stack.len());
     }
 }
