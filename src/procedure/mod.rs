@@ -40,7 +40,11 @@ pub struct Specification {
 
 impl Specification {
     pub fn support(&self, node: &Node) -> bool {
-        if node.value.to_uppercase().ne(self.method_name.to_uppercase().as_str()) {
+        if node
+            .value
+            .to_uppercase()
+            .ne(self.method_name.to_uppercase().as_str())
+        {
             return false;
         }
 
@@ -56,7 +60,7 @@ impl Specification {
             self.method_name,
             self.args
                 .iter()
-                .map(|v: &&Type|Type::repr(v))
+                .map(|v: &&Type| Type::repr(v))
                 .collect::<Vec<_>>()
                 .join(", "),
             self.return_type.repr(),
@@ -97,5 +101,9 @@ pub fn get_procedures(node: &Node) -> Box<dyn Procedure> {
         }
     }
 
-    panic!("Unable to find procedure for {} with {} params", node.value, node.params.len());
+    panic!(
+        "Unable to find procedure for {} with {} params",
+        node.value,
+        node.params.len()
+    );
 }

@@ -1,6 +1,5 @@
 use crate::procedure::{Procedure, Specification, Type};
-use crate::vm::Value;
-use crate::vm::Stack;
+use crate::vm::{Stack, Value};
 
 pub fn get_procedures() -> Vec<Box<dyn Procedure>> {
     vec![
@@ -22,10 +21,10 @@ pub struct Expression {
 
 impl Procedure for Expression {
     fn spec(&self) -> Specification {
-        Specification{
+        Specification {
             method_name: self.v,
             args: vec![&Type::Any(1), &Type::Any(1)],
-            return_type: &Type::Any(1)
+            return_type: &Type::Any(1),
         }
     }
     fn execute(&self, argc: usize, stack: &mut Stack) {

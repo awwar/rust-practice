@@ -46,7 +46,11 @@ impl Node {
     }
 
     pub fn new_operation(operation: String, params: Vec<Self>, token_position: usize) -> Self {
-        let priority = OPERATION_PRIORITY.iter().position(|n| n.eq(&operation)).unwrap_or(3) + 1;
+        let priority = OPERATION_PRIORITY
+            .iter()
+            .position(|n| n.eq(&operation))
+            .unwrap_or(3)
+            + 1;
 
         Node {
             node_type: NodeType::Operation,
@@ -65,7 +69,11 @@ impl Node {
         };
 
         Self {
-            node_type: if value.contains('.') { NodeType::Float } else { NodeType::Integer },
+            node_type: if value.contains('.') {
+                NodeType::Float
+            } else {
+                NodeType::Integer
+            },
             value: parsed_value,
             params: vec![],
             priority: 4,
@@ -76,7 +84,12 @@ impl Node {
     pub fn new_string(value: String, token_position: usize) -> Self {
         Self {
             node_type: NodeType::String,
-            value: value.strip_prefix('"').unwrap().strip_suffix('"').unwrap().to_string(),
+            value: value
+                .strip_prefix('"')
+                .unwrap()
+                .strip_suffix('"')
+                .unwrap()
+                .to_string(),
             params: vec![],
             priority: 4,
             token_position,

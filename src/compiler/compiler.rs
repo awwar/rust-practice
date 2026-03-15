@@ -37,7 +37,8 @@ impl Compiler {
                     break;
                 }
                 self.sub_compile(child.params.first().unwrap().clone())?;
-                self.program.new_heap(child.params.last().unwrap().value.clone());
+                self.program
+                    .new_heap(child.params.last().unwrap().value.clone());
             }
 
             for child in node_copy.params.iter().skip(from_param) {
@@ -71,11 +72,14 @@ impl Compiler {
         } else if node_type == NodeType::Variable {
             self.program.new_push_var(node_copy.value.clone());
         } else if node_type == NodeType::Constant || node_type == NodeType::String {
-            self.program.new_push(Value::String(node_copy.value.clone()));
+            self.program
+                .new_push(Value::String(node_copy.value.clone()));
         } else if node_type == NodeType::Float {
-            self.program.new_push(Value::Float(node_copy.value.parse::<f64>().unwrap()));
+            self.program
+                .new_push(Value::Float(node_copy.value.parse::<f64>().unwrap()));
         } else if node_type == NodeType::Integer {
-            self.program.new_push(Value::Integer(node_copy.value.parse::<i64>().unwrap()));
+            self.program
+                .new_push(Value::Integer(node_copy.value.parse::<i64>().unwrap()));
         }
 
         Ok(())

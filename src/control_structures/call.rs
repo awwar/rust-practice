@@ -23,7 +23,11 @@ impl ControlStructures for Call {
             node = proc.spec().parse(node)?;
         }
 
-        Ok(Node::new_operation(token.value, vec![node, variable], token.at))
+        Ok(Node::new_operation(
+            token.value,
+            vec![node, variable],
+            token.at,
+        ))
     }
     fn compile(&self, sc: &mut Compiler, node: Node) -> Result<(), String> {
         let subnode = node.params.first().unwrap();

@@ -61,7 +61,10 @@ impl TokenStream {
     pub fn has(&mut self, i: usize) -> bool {
         self.tokens.get(i).is_some()
     }
-    pub fn search_idx_of_closed_bracer(&mut self, mut current_position: usize) -> Result<usize, String> {
+    pub fn search_idx_of_closed_bracer(
+        &mut self,
+        mut current_position: usize,
+    ) -> Result<usize, String> {
         let start_token = self.get(current_position)?;
 
         let mut counts = 0;
@@ -109,19 +112,30 @@ struct Specs(Vec<Spec>);
 impl Specs {
     fn new() -> Self {
         Specs(Vec::from([
-            Spec::new(TokenName::Whitespace, |c, _| c.is_whitespace() || c.is_control()),
+            Spec::new(TokenName::Whitespace, |c, _| {
+                c.is_whitespace() || c.is_control()
+            }),
             // 111 1 1.1 .1
-            Spec::new(TokenName::Number, |c, b| c.is_numeric() || (c == '.' && !b.contains('.')) || (c == '-' && b.is_empty())),
+            Spec::new(TokenName::Number, |c, b| {
+                c.is_numeric() || (c == '.' && !b.contains('.')) || (c == '-' && b.is_empty())
+            }),
             // aaa 1aa a1a a_1a
-            Spec::new(TokenName::Word, |c, _| { c.is_alphanumeric() || "#$_".contains(c) }),
+            Spec::new(TokenName::Word, |c, _| {
+                c.is_alphanumeric() || "#$_".contains(c)
+            }),
             // + - * / =
-            Spec::new(TokenName::Operator, |c, b| b.is_empty() && "+-*/<>^=&|".contains(c)),
+            Spec::new(TokenName::Operator, |c, b| {
+                b.is_empty() && "+-*/<>^=&|".contains(c)
+            }),
             // ( ) [ ]
-            Spec::new(TokenName::Bracket, |c, b| b.is_empty() && "[]()".contains(c)),
+            Spec::new(TokenName::Bracket, |c, b| {
+                b.is_empty() && "[]()".contains(c)
+            }),
             Spec::new(TokenName::Comma, |c, b| b.is_empty() && ",".contains(c)),
             // "foo bar baz"
             Spec::new(TokenName::String, |c, b| {
-                !(b.len() > 1 && b.starts_with('"') && b.ends_with('"')) && (!b.is_empty() || c == '"')
+                !(b.len() > 1 && b.starts_with('"') && b.ends_with('"'))
+                    && (!b.is_empty() || c == '"')
             }),
         ]))
     }
@@ -145,7 +159,10 @@ impl Specs {
             return None;
         }
 
-        assert!(!(candidate.is_none() || b.is_empty()), "got unexpected character \"{c}\"");
+        assert!(
+            !(candidate.is_none() || b.is_empty()),
+            "got unexpected character \"{c}\""
+        );
 
         candidate
     }

@@ -1,7 +1,7 @@
 use crate::procedure::Procedure;
-use std::collections::BTreeMap;
 use crate::vm::operation::{Operation, OperationName};
 use crate::vm::Value;
+use std::collections::BTreeMap;
 
 pub struct Program {
     ops: Vec<Operation>,

@@ -2,19 +2,17 @@ use crate::procedure::{Procedure, Specification, Type};
 use crate::vm::Stack;
 
 pub fn get_procedures() -> Vec<Box<dyn Procedure>> {
-    vec![
-        Box::new(Print {}),
-    ]
+    vec![Box::new(Print {})]
 }
 
 pub struct Print {}
 
 impl Procedure for Print {
     fn spec(&self) -> Specification {
-        Specification{
+        Specification {
             method_name: "PRINT",
             args: vec![&Type::String],
-            return_type: &Type::None
+            return_type: &Type::None,
         }
     }
     fn execute(&self, argc: usize, stack: &mut Stack) {

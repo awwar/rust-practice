@@ -1,7 +1,7 @@
 use crate::vm::{get_op_executable, Operation};
+use crate::vm::{Program, Value};
 use std::time::Duration;
 use std::{env, thread};
-use crate::vm::{Program, Value};
 
 pub struct Stack(Vec<Value>);
 

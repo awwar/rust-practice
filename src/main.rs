@@ -1,14 +1,14 @@
 mod compiler;
-mod parser;
+mod control_structures;
 mod lexer;
+mod parser;
 mod procedure;
 mod vm;
-mod control_structures;
 
 use crate::compiler::Compiler;
 use crate::lexer::TokenStream;
 use crate::parser::Parser;
-use crate::vm::{VM};
+use crate::vm::VM;
 use std::fs;
 use std::time::Instant;
 
@@ -44,5 +44,9 @@ fn main() {
     let duration = now.elapsed();
 
     println!("{}ms {}ns", duration.as_millis(), duration.as_nanos());
-    println!("{}ms/op {}ns/op", duration.as_millis() / c, duration.as_nanos() / c);
+    println!(
+        "{}ms/op {}ns/op",
+        duration.as_millis() / c,
+        duration.as_nanos() / c
+    );
 }

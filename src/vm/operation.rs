@@ -1,7 +1,7 @@
-use std::fmt::Display;
-use crate::vm::program::{Program};
+use crate::vm::program::Program;
 use crate::vm::value::Value;
 use crate::vm::vm::{Memo, Stack};
+use std::fmt::Display;
 
 pub type Executable = fn(&mut Program, &mut Stack, &mut Memo);
 

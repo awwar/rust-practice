@@ -43,7 +43,10 @@ impl Parser {
         let token = self.stream.get(self.current_position)?;
 
         if token.name != TokenName::Word || !token.starts_with("#") {
-            return Err(self.error(self.current_position, "flow declaration must start with # and has argument and return value"));
+            return Err(self.error(
+                self.current_position,
+                "flow declaration must start with # and has argument and return value",
+            ));
         }
 
         let mut list = Vec::<Node>::new();
@@ -125,18 +128,32 @@ impl Parser {
             return Err(self.error(start_token.at, "word token uses only in function context"));
         }
 
-        let end_bracer_position = self.stream.search_idx_of_closed_bracer(self.current_position)?;
+        let end_bracer_position = self
+            .stream
+            .search_idx_of_closed_bracer(self.current_position)?;
 
         let mut sub_nodes: Vec<Node> = Vec::new();
 
         if self.current_position != end_bracer_position - 1 {
-            let mut sub_parser = Parser::new(self.stream.clone(), self.current_position + 1, end_bracer_position - 1);
+            let mut sub_parser = Parser::new(
+                self.stream.clone(),
+                self.current_position + 1,
+                end_bracer_position - 1,
+            );
 
             sub_nodes = sub_parser.subparse_expressions()?;
         }
 
         if length.is_some() && sub_nodes.len() != length.unwrap() {
-            return Err(self.error(start_token.at, format!("expected {} nodes, got {}", sub_nodes.len(), length.unwrap()).as_str()));
+            return Err(self.error(
+                start_token.at,
+                format!(
+                    "expected {} nodes, got {}",
+                    sub_nodes.len(),
+                    length.unwrap()
+                )
+                .as_str(),
+            ));
         }
 
         self.current_position = end_bracer_position;
@@ -152,7 +169,11 @@ impl Parser {
 
             match token.name {
                 TokenName::Comma => {
-                    let mut sub_parser = Self::new(self.stream.clone(), self.current_position + 1, self.last_position);
+                    let mut sub_parser = Self::new(
+                        self.stream.clone(),
+                        self.current_position + 1,
+                        self.last_position,
+                    );
                     let sub_nodes = sub_parser.subparse_expressions()?;
                     list.extend(sub_nodes);
                     break;
@@ -202,7 +223,10 @@ impl Parser {
         let next_token = self.stream.get(self.current_position)?;
 
         if next_token.name != TokenName::Word {
-            return Err(self.error(self.current_position, "word token uses only in function context"));
+            return Err(self.error(
+                self.current_position,
+                "word token uses only in function context",
+            ));
         }
 
         Ok(Node::new_constant(next_token.value, self.current_position))
@@ -269,7 +293,11 @@ fn math_operations(mut list: Vec<Node>, pointer: usize) -> Option<Vec<Node>> {
         return None;
     }
 
-    let to = [Node::new_operation(cur.value.clone(), vec![lft.clone(), rgt.clone()], cur.token_position)];
+    let to = [Node::new_operation(
+        cur.value.clone(),
+        vec![lft.clone(), rgt.clone()],
+        cur.token_position,
+    )];
 
     list.splice(pointer - 1..pointer + 2, to);
 
@@ -290,7 +318,11 @@ fn function_call(mut list: Vec<Node>, pointer: usize) -> Option<Vec<Node>> {
         return None;
     }
 
-    let to = [Node::new_operation(rgt.value.clone(), vec![lft.clone()], cur.token_position)];
+    let to = [Node::new_operation(
+        rgt.value.clone(),
+        vec![lft.clone()],
+        cur.token_position,
+    )];
 
     list.splice(pointer - 1..pointer + 2, to);
 

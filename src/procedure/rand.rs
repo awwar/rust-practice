@@ -1,16 +1,13 @@
+use crate::procedure::{Procedure, Specification, Type};
+use crate::vm::{Stack, Value};
+use rand::rngs::SmallRng;
+use rand::SeedableRng;
+use rand::{Rng, RngExt};
 use std::cell::RefCell;
 use std::rc::Rc;
-use crate::procedure::{Procedure, Specification, Type};
-use crate::vm::Value;
-use crate::vm::Stack;
-use rand::{Rng, RngExt};
-use rand::rngs::SmallRng;
-use rand::{SeedableRng};
 
 pub fn get_procedures() -> Vec<Box<dyn Procedure>> {
-    vec![
-        Box::new(Rand::new()),
-    ]
+    vec![Box::new(Rand::new())]
 }
 
 pub struct Rand {
@@ -29,10 +26,10 @@ impl Rand {
 
 impl Procedure for Rand {
     fn spec(&self) -> Specification {
-        Specification{
+        Specification {
             method_name: "RAND",
             args: vec![],
-            return_type: &Type::Float
+            return_type: &Type::Float,
         }
     }
     fn execute(&self, argc: usize, stack: &mut Stack) {

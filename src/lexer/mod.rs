@@ -1,7 +1,3 @@
 mod lex;
 
-pub use crate::lexer::lex::{
-    Token,
-    TokenName,
-    TokenStream,
-};
+pub use crate::lexer::lex::{Token, TokenName, TokenStream};
