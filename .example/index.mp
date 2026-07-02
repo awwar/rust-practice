@@ -1,25 +1,26 @@
 #MAIN() void
-call #LOTTERY () $LOTTERY_RESULT
+CALL #LOTTERY () $LOTTERY_RESULT
 
 #LOTTERY() void
-var (-32) $SOME_VALUE
+VAR $SOME_VALUE (-32)
 
-call #FLIP_COIN (0.5) $FLIP_COIN_RESULT
+CALL #FLIP_COIN (0.5) $FLIP_COIN_RESULT
 
-if ($FLIP_COIN_RESULT) (#MORE, #LESS)
+IF ($FLIP_COIN_RESULT) (#MORE, #LESS)
 
-call print ("Try Next?") $_
+CALL print ("Try Next?") $_
 
-return (void(0))
+RETURN (void(0))
 
 #MORE() void
-call print ("you're WIN!") $_
+CALL print ("you're WIN!") $_
 
 #LESS() bool
-var ("you're lose " + string($SOME_VALUE) + " points!") $OUT_RESULT
+VAR $OUT_RESULT ("you're lose " + string($SOME_VALUE) + " points!")
 
-call print ($OUT_RESULT) $_
+CALL print ($OUT_RESULT) $_
 
-#FLIP_COIN(VAR(float(0), $FLIP_COIN_ARG0)) bool
+#FLIP_COIN() bool
+DEF struct flip_coin_args {TRESHOLD: float}
 
-return (bool(rand() > $FLIP_COIN_ARG0))
+return (bool(rand() > flip_coin_args.TRESHOLD))

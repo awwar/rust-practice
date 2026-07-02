@@ -13,8 +13,8 @@ use std::fs;
 use std::time::Instant;
 
 fn main() {
-    let input = fs::read_to_string("./.example/index.mp")
-        .expect("Should have been able to read the file");
+    let input =
+        fs::read_to_string("./.example/index.mp").expect("Should have been able to read the file");
 
     let stream = TokenStream::new(input);
 
@@ -35,7 +35,7 @@ fn main() {
     let vm = VM::new();
     let now = Instant::now();
 
-    let c = 1_000_000;
+    let c = 1;
 
     for _ in 0..c {
         vm.execute(prog);

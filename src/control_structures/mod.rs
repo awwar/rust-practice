@@ -6,6 +6,7 @@ pub mod call;
 pub mod cond;
 pub mod ret;
 pub mod var;
+pub mod def;
 
 pub trait ControlStructures {
     fn parse(&self, token: Token, _parser: &mut Parser) -> Result<Node, String>;
@@ -18,6 +19,7 @@ pub fn get_control_structures(name: &str) -> Box<dyn ControlStructures> {
         "IF" => Box::new(cond::If {}),
         "RETURN" => Box::new(ret::Return {}),
         "VAR" => Box::new(var::Var {}),
+        "DEF" => Box::new(def::Def {}),
         _ => panic!("Unknown control structure {name}"),
     }
 }

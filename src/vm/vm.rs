@@ -1,6 +1,5 @@
-use crate::vm::{get_op_executable, Operation, Program, Value};
-use std::time::Duration;
-use std::{env, thread};
+use crate::debug;
+use crate::vm::{Program, Value, get_op_executable};
 
 pub struct Stack(Vec<Value>);
 
@@ -14,24 +13,15 @@ impl Stack {
     pub fn pop(&mut self) -> Value {
         self.0.pop().unwrap()
     }
-    pub fn len(&self) -> usize {
-        self.0.len()
-    }
 }
 
 pub type Memo = Vec<Value>;
 
-pub struct VM {
-    debug: bool,
-}
+pub struct VM {}
 
 impl VM {
     pub fn new() -> VM {
-        VM {
-            debug: env::var("DEBUG")
-                .unwrap_or_else(|_e| "0".to_string())
-                .eq("1"),
-        }
+        VM {}
     }
     pub fn execute(&self, pr: &mut Program) {
         let stack = &mut Stack::new();
@@ -47,18 +37,23 @@ impl VM {
 
             let op = pr.current();
 
-            self.debug(op, stack);
+            debug!(println!("> {} {}", op, stack.len()));
 
             get_op_executable(&op.name)(pr, stack, memo);
         }
     }
+}
 
-    fn debug(&self, op: &Operation, stack: &Stack) {
-        if !self.debug {
-            return;
-        }
+#[cfg(debug_enabled)]
+#[macro_export]
+macro_rules! debug {
+    ($body:expr) => {
+        $body;
+    };
+}
 
-        thread::sleep(Duration::from_millis(200));
-        println!("> {} {}", op, stack.len());
-    }
+#[cfg(not(debug_enabled))]
+#[macro_export]
+macro_rules! debug {
+    ($body:expr) => {};
 }

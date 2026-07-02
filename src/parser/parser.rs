@@ -44,7 +44,7 @@ impl Parser {
 
         if token.name != TokenName::Word || !token.starts_with("#") {
             return Err(self.error(
-                self.current_position,
+                token.at,
                 "flow declaration must start with # and has argument and return value",
             ));
         }
@@ -54,7 +54,7 @@ impl Parser {
         let next_token = self.stream.get(self.current_position + 1)?;
 
         if next_token.name != TokenName::Bracket {
-            return Err(self.error(next_token.at, "word token uses only in function context"));
+            return Err(self.error(next_token.at, "flow declaration must have a argument list #foo()"));
         }
 
         let args = self.subparse_list_in_bracers(None)?;
@@ -125,7 +125,7 @@ impl Parser {
         let open_bracer = self.stream.get(self.current_position)?;
 
         if open_bracer.name != TokenName::Bracket {
-            return Err(self.error(start_token.at, "word token uses only in function context"));
+            return Err(self.error(start_token.at, "expected bracket symbol"));
         }
 
         let end_bracer_position = self

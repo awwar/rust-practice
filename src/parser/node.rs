@@ -7,6 +7,8 @@ pub enum NodeType {
     String,
     Float,
     Integer,
+    StructDeclaration,
+    KeyValuePair,
     Variable,
     FlowLink,
     FlowDeclaration,
@@ -101,6 +103,26 @@ impl Node {
             node_type: NodeType::FlowDeclaration,
             value: value.to_uppercase(),
             params,
+            priority: 4,
+            token_position,
+        }
+    }
+    
+    pub fn new_struct_declaration(type_name: String, params: Vec<Self>, token_position: usize) -> Self {
+        Self {
+            node_type: NodeType::StructDeclaration,
+            value: type_name.to_uppercase(),
+            params: params,
+            priority: 4,
+            token_position,
+        }
+    }
+    
+    pub fn new_key_value_pair(type_name: String, key: Node, value: Node, token_position: usize) -> Self {
+        Self {
+            node_type: NodeType::StructDeclaration,
+            value: type_name.to_uppercase(),
+            params: vec![key, value],
             priority: 4,
             token_position,
         }

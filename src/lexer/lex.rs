@@ -29,6 +29,10 @@ impl TokenStream {
                 break;
             }
 
+            if last_char_idx > chars.len() {
+                panic!("Lexer find nothing! Last token {:?}", buffer)
+            }
+
             if let Some(spec) = specs.decide(char, buffer.clone()) {
                 specs.reset();
 
@@ -71,6 +75,10 @@ impl TokenStream {
             match token.value.as_str() {
                 "(" => counts += 1,
                 ")" => counts -= 1,
+                "{" => counts += 1,
+                "}" => counts -= 1,
+                "[" => counts += 1,
+                "]" => counts -= 1,
                 _ => {}
             }
 
@@ -111,7 +119,7 @@ impl Specs {
     fn new() -> Self {
         Specs(Vec::from([
             Spec::new(TokenName::Whitespace, |c, _| {
-                c.is_whitespace() || c.is_control()
+                c.is_whitespace() || c.is_control() || c.is_ascii_whitespace() || c == '\n' || c == '\r'
             }),
             // 111 1 1.1 .1
             Spec::new(TokenName::Number, |c, b| {
@@ -123,11 +131,11 @@ impl Specs {
             }),
             // + - * / =
             Spec::new(TokenName::Operator, |c, b| {
-                b.is_empty() && "+-*/<>^=&|".contains(c)
+                b.is_empty() && "+-*/<>^=&|:".contains(c)
             }),
             // ( ) [ ]
             Spec::new(TokenName::Bracket, |c, b| {
-                b.is_empty() && "[]()".contains(c)
+                b.is_empty() && "[](){}".contains(c)
             }),
             Spec::new(TokenName::Comma, |c, b| b.is_empty() && ",".contains(c)),
             // "foo bar baz"

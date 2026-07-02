@@ -9,3 +9,6 @@ debug = true
 strip = false
 [profile.dev]
 debug = true
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(debug_enabled)'] }

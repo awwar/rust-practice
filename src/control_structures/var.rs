@@ -7,10 +7,10 @@ pub struct Var {}
 
 impl ControlStructures for Var {
     fn parse(&self, token: Token, parser: &mut Parser) -> Result<Node, String> {
-        // VAR (expression) $VAR_NAME
-        let expr = parser.subparse_one_in_bracers()?;
-
+        // VAR $VAR_NAME (expression)
         let variable_name = parser.subparse_variable_name()?;
+                
+        let expr = parser.subparse_one_in_bracers()?;
 
         Ok(Node::new_operation(
             token.value,
