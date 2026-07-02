@@ -12,11 +12,20 @@ impl ControlStructures for Var {
 
         let variable_name = parser.subparse_variable_name()?;
 
-        Ok(Node::new_operation(token.value, vec![variable_name, expr], token.at))
+        Ok(Node::new_operation(
+            token.value,
+            vec![variable_name, expr],
+            token.at,
+        ))
     }
     fn compile(&self, sc: &mut Compiler, node: Node) -> Result<(), String> {
-        sc.sub_compile(node.params.get(1).unwrap().clone())?;
-        sc.program.new_var(node.params.first().unwrap().value.clone());
+        let var_name = node.params.first().unwrap().value.clone();
+
+        if !var_name.eq("$_") {
+            sc.sub_compile(node.params.last().unwrap().clone())?;
+
+            sc.program.new_heap(var_name);
+        }
 
         Ok(())
     }

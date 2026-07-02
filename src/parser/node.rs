@@ -46,21 +46,19 @@ impl Node {
     }
 
     pub fn new_operation(operation: String, params: Vec<Self>, token_position: usize) -> Self {
-        let priority = OPERATION_PRIORITY.iter().position(|n| n.eq(&operation)).unwrap_or(0) + 1;
+        let priority = OPERATION_PRIORITY
+            .iter()
+            .position(|n| n.eq(&operation))
+            .unwrap_or(3)
+            + 1;
 
-        let mut node = Node {
+        Node {
             node_type: NodeType::Operation,
             value: operation.to_uppercase(),
             params,
             priority,
             token_position,
-        };
-
-        if !node.is_mathematical_operation() {
-            node.priority = 4;
         }
-
-        node
     }
 
     pub fn new_number(value: String, token_position: usize) -> Self {
@@ -71,7 +69,11 @@ impl Node {
         };
 
         Self {
-            node_type: if value.contains('.') { NodeType::Float } else { NodeType::Integer },
+            node_type: if value.contains('.') {
+                NodeType::Float
+            } else {
+                NodeType::Integer
+            },
             value: parsed_value,
             params: vec![],
             priority: 4,
@@ -82,7 +84,12 @@ impl Node {
     pub fn new_string(value: String, token_position: usize) -> Self {
         Self {
             node_type: NodeType::String,
-            value: value.strip_prefix('"').unwrap().strip_suffix('"').unwrap().to_string(),
+            value: value
+                .strip_prefix('"')
+                .unwrap()
+                .strip_suffix('"')
+                .unwrap()
+                .to_string(),
             params: vec![],
             priority: 4,
             token_position,
@@ -163,5 +170,9 @@ impl Node {
 
     pub fn is_flow_link(&self) -> bool {
         self.node_type == NodeType::FlowLink
+    }
+
+    pub fn is_flow_link_word(&self) -> bool {
+        self.value.starts_with('#')
     }
 }

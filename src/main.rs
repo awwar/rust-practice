@@ -1,21 +1,19 @@
 mod compiler;
-mod parser;
+mod control_structures;
 mod lexer;
-mod program;
-mod util;
+mod parser;
 mod procedure;
 mod vm;
-mod control_structures;
 
 use crate::compiler::Compiler;
 use crate::lexer::TokenStream;
 use crate::parser::Parser;
-use crate::vm::{VM};
+use crate::vm::VM;
 use std::fs;
 use std::time::Instant;
 
 fn main() {
-    let input = fs::read_to_string("./.example/array.mp")
+    let input = fs::read_to_string("./.example/index.mp")
         .expect("Should have been able to read the file");
 
     let stream = TokenStream::new(input);
@@ -37,9 +35,18 @@ fn main() {
     let vm = VM::new();
     let now = Instant::now();
 
-    for _ in 0..1_000_000 {
+    let c = 1_000_000;
+
+    for _ in 0..c {
         vm.execute(prog);
     }
 
-    println!("{}ms", now.elapsed().as_millis());
+    let duration = now.elapsed();
+
+    println!("{}ms {}ns", duration.as_millis(), duration.as_nanos());
+    println!(
+        "{}ms/op {}ns/op",
+        duration.as_millis() / c,
+        duration.as_nanos() / c
+    );
 }

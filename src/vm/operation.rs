@@ -1,85 +1,148 @@
-use crate::procedure::{get_procedures};
-use crate::program::{Program, Value};
+use crate::vm::program::Program;
+use crate::vm::value::Value;
 use crate::vm::vm::{Memo, Stack};
+use std::fmt::Display;
 
 pub type Executable = fn(&mut Program, &mut Stack, &mut Memo);
 
-pub fn jmp(pr: &mut Program, _: &mut Stack, _: &mut Memo) {
-    let mark_name = pr.current().unwrap().word.clone().unwrap();
+pub enum OperationName {
+    Push,
+    Exec,
+    Mark,
+    Jmp,
+    Heap,
+    Cskip,
+    Skip,
+}
+
+pub fn get_op_executable(name: &OperationName) -> Executable {
+    match name {
+        OperationName::Push => push,
+        OperationName::Exec => exec,
+        OperationName::Mark => mark,
+        OperationName::Jmp => jmp,
+        OperationName::Heap => heap,
+        OperationName::Cskip => cskip,
+        OperationName::Skip => skip,
+    }
+}
+
+impl Display for OperationName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
+            OperationName::Push => "PUSH",
+            OperationName::Exec => "EXEC",
+            OperationName::Mark => "MARK",
+            OperationName::Jmp => "JMP",
+            OperationName::Heap => "HEAP",
+            OperationName::Cskip => "CSKIP",
+            OperationName::Skip => "SKIP",
+        };
+
+        f.write_str(str)
+    }
+}
+
+pub struct Operation {
+    pub name: OperationName,
+    pub count: usize,
+    pub id: usize,
+    pub value: Value,
+}
+
+impl Operation {
+    pub fn new_value(name: OperationName, value: Value) -> Self {
+        Self {
+            name,
+            value,
+            id: 0,
+            count: 0,
+        }
+    }
+    pub fn new_count(name: OperationName, count: usize) -> Self {
+        Self {
+            name,
+            count,
+            id: 0,
+            value: Value::Null,
+        }
+    }
+    pub fn new_word_count(name: OperationName, id: usize, count: usize) -> Self {
+        Self {
+            name,
+            count,
+            id,
+            value: Value::Null,
+        }
+    }
+    pub fn new_id(name: OperationName, id: usize) -> Self {
+        Self {
+            name,
+            count: 0,
+            id,
+            value: Value::Null,
+        }
+    }
+}
+
+impl Display for Operation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut sb = self.name.to_string();
+
+        sb.push_str(format!(" id: {},", self.id.clone()).as_str());
+        sb.push_str(format!(" count: {},", self.count.clone()).as_str());
+        sb.push_str(format!(" value: {}", self.value.repr()).as_str());
+
+        f.write_str(sb.as_str())
+    }
+}
+
+fn jmp(pr: &mut Program, _: &mut Stack, _: &mut Memo) {
     pr.trace_back();
-    pr.jump_to_mark(mark_name);
+    pr.jump_to_mark(pr.current().id);
 }
 
-pub fn exec(pr: &mut Program, st: &mut Stack, _: &mut Memo) {
-    let op = pr.current().unwrap();
+fn exec(pr: &mut Program, st: &mut Stack, _: &mut Memo) {
+    let op = pr.current();
+    let proc = pr.get_procedure(op.id);
 
-    let binding = op.word.clone().unwrap();
-    let proc = get_procedures(binding.as_str());
-    let argc = op.count.unwrap();
-
-    proc.execute(argc, st).unwrap();
+    proc.execute(op.count, st);
 }
 
-pub fn mark(pr: &mut Program, _: &mut Stack, _: &mut Memo) {
+fn mark(pr: &mut Program, _: &mut Stack, _: &mut Memo) {
     pr.finish_block();
     pr.skip(0);
 }
 
-pub fn push(pr: &mut Program, st: &mut Stack, mem: &mut Memo) {
-    let op = pr.current().unwrap();
-
-    let value = op.value.clone().unwrap().clone();
-    let raw_val = value.repr();
-
-    if raw_val.starts_with('$') {
-        st.push(mem.get(&raw_val).unwrap().clone());
-    } else {
-        st.push(value);
+fn push(pr: &mut Program, st: &mut Stack, mem: &mut Memo) {
+    match &pr.current().value {
+        Value::Variable(var) => st.push(mem[*var].clone()),
+        value => st.push(value.clone()),
     }
 }
 
-pub fn skip(pr: &mut Program, _: &mut Stack, _: &mut Memo) {
-    let skip = pr.current().unwrap().count.unwrap();
-
-    pr.skip(skip);
+fn skip(pr: &mut Program, _: &mut Stack, _: &mut Memo) {
+    pr.skip(pr.current().count);
 }
 
-pub fn cskip(pr: &mut Program, st: &mut Stack, _: &mut Memo) {
+fn cskip(pr: &mut Program, st: &mut Stack, _: &mut Memo) {
     let operand = st.pop();
 
-    let condition_result = operand.to_bool().eq(&Value::Boolean(true));
+    let Value::Bool(cond) = operand else {
+        panic!("cskip condition must be a bool");
+    };
 
-    if let Value::Boolean(true) = condition_result {
-        let skip = pr.current().unwrap().count.unwrap();
+    if cond {
+        let skip = pr.current().count;
 
         pr.skip(skip);
     }
 }
 
-pub fn var(pr: &mut Program, st: &mut Stack, mem: &mut Memo) {
-    let op = pr.current().unwrap();
+fn heap(pr: &mut Program, st: &mut Stack, mem: &mut Memo) {
+    let Value::Variable(var) = pr.current().value else {
+        panic!("invalid pr.current() var - expecting value")
+    };
 
-    let var_name = op.word.clone().unwrap();
-
-    assert!(
-        !mem.contains_key(&var_name),
-        "variable {var_name} already defined"
-    );
-
-    let operand = st.pop();
-
-    mem.insert(var_name, operand);
-}
-
-pub fn get_op_executable(name: &str) -> Executable {
-    match name {
-        "JMP" => jmp,
-        "EXEC" => exec,
-        "MARK" => mark,
-        "PUSH" => push,
-        "SKIP" => skip,
-        "CSKIP" => cskip,
-        "VAR" => var,
-        _ => panic!("Unknown variable name"),
-    }
+    mem[var] = st.pop();
 }

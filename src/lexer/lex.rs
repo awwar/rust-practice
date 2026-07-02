@@ -49,16 +49,22 @@ impl TokenStream {
 
         TokenStream { tokens }
     }
-    pub fn get(&mut self, i: usize) -> Option<Token> {
-        let candidate = self.tokens.get(i);
-
-        if candidate.is_some() {
-            return Some(candidate.unwrap().clone());
+    pub fn get(&mut self, i: usize) -> Result<Token, String> {
+        if let Some(token) = self.tokens.get(i) {
+            return Ok(token.clone());
         }
 
-        None
+        Err(format!("unable to find token at {i:?}"))
     }
-    pub fn search_idx_of_closed_bracer(&mut self, mut current_position: usize) -> Option<usize> {
+    pub fn has(&mut self, i: usize) -> bool {
+        self.tokens.get(i).is_some()
+    }
+    pub fn search_idx_of_closed_bracer(
+        &mut self,
+        mut current_position: usize,
+    ) -> Result<usize, String> {
+        let start_token = self.get(current_position)?;
+
         let mut counts = 0;
 
         while let Some(token) = self.tokens.get(current_position) {
@@ -69,13 +75,13 @@ impl TokenStream {
             }
 
             if counts == 0 {
-                return Some(current_position);
+                return Ok(current_position);
             }
 
             current_position += 1;
         }
 
-        None
+        Err(format!("unable to find token at {:?}", start_token.at))
     }
 }
 
@@ -104,19 +110,30 @@ struct Specs(Vec<Spec>);
 impl Specs {
     fn new() -> Self {
         Specs(Vec::from([
-            Spec::new(TokenName::Whitespace, |c, _| c.is_whitespace() || c.is_control()),
+            Spec::new(TokenName::Whitespace, |c, _| {
+                c.is_whitespace() || c.is_control()
+            }),
             // 111 1 1.1 .1
-            Spec::new(TokenName::Number, |c, b| c.is_numeric() || (c == '.' && !b.contains('.')) || (c == '-' && b.is_empty())),
+            Spec::new(TokenName::Number, |c, b| {
+                c.is_numeric() || (c == '.' && !b.contains('.')) || (c == '-' && b.is_empty())
+            }),
             // aaa 1aa a1a a_1a
-            Spec::new(TokenName::Word, |c, _| { c.is_alphanumeric() || "#$_".contains(c) }),
+            Spec::new(TokenName::Word, |c, _| {
+                c.is_alphanumeric() || "#$_".contains(c)
+            }),
             // + - * / =
-            Spec::new(TokenName::Operator, |c, b| b.is_empty() && "+-*/<>^=&|".contains(c)),
+            Spec::new(TokenName::Operator, |c, b| {
+                b.is_empty() && "+-*/<>^=&|".contains(c)
+            }),
             // ( ) [ ]
-            Spec::new(TokenName::Bracket, |c, b| b.is_empty() && "[]()".contains(c)),
+            Spec::new(TokenName::Bracket, |c, b| {
+                b.is_empty() && "[]()".contains(c)
+            }),
             Spec::new(TokenName::Comma, |c, b| b.is_empty() && ",".contains(c)),
             // "foo bar baz"
             Spec::new(TokenName::String, |c, b| {
-                !(b.len() > 1 && b.starts_with('"') && b.ends_with('"')) && (!b.is_empty() || c == '"')
+                !(b.len() > 1 && b.starts_with('"') && b.ends_with('"'))
+                    && (!b.is_empty() || c == '"')
             }),
         ]))
     }
@@ -140,7 +157,10 @@ impl Specs {
             return None;
         }
 
-        assert!(!(candidate.is_none() || b.is_empty()), "got unexpected character \"{c}\"");
+        assert!(
+            !(candidate.is_none() || b.is_empty()),
+            "got unexpected character \"{c}\""
+        );
 
         candidate
     }

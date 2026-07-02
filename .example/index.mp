@@ -16,11 +16,10 @@ return (void(0))
 call print ("you're WIN!") $_
 
 #LESS() bool
-var (string($SOME_VALUE)) $STR_SOME_VALUE
-var (sum("you're lose ", $STR_SOME_VALUE, " points!")) $OUT_RESULT
+var ("you're lose " + string($SOME_VALUE) + " points!") $OUT_RESULT
 
 call print ($OUT_RESULT) $_
 
-#FLIP_COIN(float($FLIP_COIN_ARG0)) bool
+#FLIP_COIN(VAR(float(0), $FLIP_COIN_ARG0)) bool
 
 return (bool(rand() > $FLIP_COIN_ARG0))

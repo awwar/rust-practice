@@ -8,12 +8,8 @@ pub mod ret;
 pub mod var;
 
 pub trait ControlStructures {
-    fn parse(&self, token: Token, _parser: &mut Parser) -> Result<Node, String> {
-        Ok(Node::new_operation(token.value, vec![], token.at))
-    }
-    fn compile(&self, sc: &mut Compiler, node: Node) -> Result<(), String> {
-        sc.sub_compile(node)
-    }
+    fn parse(&self, token: Token, _parser: &mut Parser) -> Result<Node, String>;
+    fn compile(&self, sc: &mut Compiler, node: Node) -> Result<(), String>;
 }
 
 pub fn get_control_structures(name: &str) -> Box<dyn ControlStructures> {
@@ -22,6 +18,6 @@ pub fn get_control_structures(name: &str) -> Box<dyn ControlStructures> {
         "IF" => Box::new(cond::If {}),
         "RETURN" => Box::new(ret::Return {}),
         "VAR" => Box::new(var::Var {}),
-        _ => panic!("Unknown procedure {name}"),
+        _ => panic!("Unknown control structure {name}"),
     }
 }

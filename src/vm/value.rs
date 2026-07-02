@@ -1,8 +1,10 @@
 #[derive(Clone, Debug)]
 pub enum Value {
+    Null,
+    Variable(usize),
     Integer(i64),
     Float(f64),
-    Boolean(bool),
+    Bool(bool),
     String(String),
     Array(Vec<Value>),
 }
@@ -10,48 +12,52 @@ pub enum Value {
 impl Value {
     pub fn repr(&self) -> String {
         match self {
-            Value::Integer(a) => a.to_string(),
-            Value::Float(a) => a.to_string(),
-            Value::Boolean(a) => a.to_string(),
-            Value::String(a) => a.clone(),
-            Value::Array(a) => format!("[{}]", a.iter().map(Value::repr).collect::<Vec<_>>().join(",")),
-            // _ => panic!("unable to int({self:?})")
+            Value::Integer(a) => format!("{a}i"),
+            Value::Float(a) => format!("{a}f"),
+            Value::Bool(a) => format!("<{a}>"),
+            Value::String(a) => format!("\"{a}\""),
+            Value::Array(a) => format!(
+                "[{}]",
+                a.iter().map(Value::repr).collect::<Vec<_>>().join(",")
+            ),
+            Value::Variable(a) => format!("${a}"),
+            Value::Null => "<null>".to_string(),
         }
     }
     pub fn to_integer(&self) -> Value {
         match self {
             Value::Integer(a) => Value::Integer(*a),
             Value::Float(a) => Value::Integer(*a as i64),
-            Value::Boolean(a) => Value::Integer(i64::from(*a)),
+            Value::Bool(a) => Value::Integer(i64::from(*a)),
             Value::String(a) => Value::Integer(a.parse::<i64>().unwrap()),
-            _ => panic!("unable to int({self:?})")
+            _ => panic!("unable to int({self:?})"),
         }
     }
     pub fn to_float(&self) -> Value {
         match self {
             Value::Integer(a) => Value::Float(*a as f64),
             Value::Float(a) => Value::Float(*a),
-            Value::Boolean(a) => Value::Float(i64::from(*a) as f64),
+            Value::Bool(a) => Value::Float(i64::from(*a) as f64),
             Value::String(a) => Value::Float(a.parse::<f64>().unwrap()),
-            _ => panic!("unable to float({self:?})")
+            _ => panic!("unable to float({self:?})"),
         }
     }
     pub fn to_bool(&self) -> Value {
         match self {
-            Value::Integer(a) => Value::Boolean(a > &0),
-            Value::Float(a) => Value::Boolean(a > &0.0),
-            Value::Boolean(a) => Value::Boolean(*a),
-            Value::String(a) => Value::Boolean(!a.is_empty()),
-            _ => panic!("unable to bool({self:?})")
+            Value::Integer(a) => Value::Bool(a > &0),
+            Value::Float(a) => Value::Bool(a > &0.0),
+            Value::Bool(a) => Value::Bool(*a),
+            Value::String(a) => Value::Bool(!a.is_empty()),
+            _ => panic!("unable to bool({self:?})"),
         }
     }
     pub fn to_string(&self) -> Value {
         match self {
             Value::Integer(a) => Value::String(a.to_string()),
             Value::Float(a) => Value::String(a.to_string()),
-            Value::Boolean(a) => Value::String(a.to_string()),
+            Value::Bool(a) => Value::String(a.to_string()),
             Value::String(a) => Value::String(a.clone()),
-            _ => panic!("unable to string({self:?})")
+            _ => panic!("unable to string({self:?})"),
         }
     }
     pub fn add(&self, r: &Self) -> Value {
@@ -65,66 +71,66 @@ impl Value {
                 combined.push_str(b);
 
                 Value::String(combined)
-            },
-            (Value::Boolean(a), Value::Boolean(b)) => Value::Boolean(*a || *b),
+            }
+            (Value::Bool(a), Value::Bool(b)) => Value::Bool(*a || *b),
             (Value::Array(a), Value::Array(b)) => {
                 let mut new_val = a.clone();
                 new_val.extend(b.clone());
                 Value::Array(new_val)
-            },
-            _ => panic!("unable to {} + {}", self.repr(), r.repr())
+            }
+            _ => panic!("unable to {} + {}", self.repr(), r.repr()),
         }
     }
     pub fn subtract(&self, r: &Self) -> Value {
         match (self, r) {
             (Value::Integer(a), Value::Integer(b)) => Value::Integer(a - b),
             (Value::Float(a), Value::Float(b)) => Value::Float(a - b),
-            _ => panic!("unable to {:?} - {:?}", self.repr(), r.repr())
+            _ => panic!("unable to {:?} - {:?}", self.repr(), r.repr()),
         }
     }
     pub fn multiply(&self, r: &Self) -> Value {
         match (self, r) {
             (Value::Integer(a), Value::Integer(b)) => Value::Integer(a * b),
             (Value::Float(a), Value::Float(b)) => Value::Float(a * b),
-            (Value::Boolean(a), Value::Boolean(b)) => Value::Boolean(*a && *b),
-            _ => panic!("unable to {:?} * {:?}", self.repr(), r.repr())
+            (Value::Bool(a), Value::Bool(b)) => Value::Bool(*a && *b),
+            _ => panic!("unable to {:?} * {:?}", self.repr(), r.repr()),
         }
     }
     pub fn divide(&self, r: &Self) -> Value {
         match (self, r) {
             (Value::Integer(a), Value::Integer(b)) => Value::Integer(a / b),
             (Value::Float(a), Value::Float(b)) => Value::Float(a / b),
-            _ => panic!("unable to {:?} / {:?}", self.repr(), r.repr())
+            _ => panic!("unable to {:?} / {:?}", self.repr(), r.repr()),
         }
     }
     pub fn power(&self, r: &Self) -> Value {
         match (self, r) {
             (Value::Integer(a), Value::Integer(b)) => Value::Integer(a ^ b),
             (Value::Float(a), Value::Float(b)) => Value::Float(a.powf(*b)),
-            _ => panic!("unable to {:?} ^ {:?}", self.repr(), r.repr())
+            _ => panic!("unable to {:?} ^ {:?}", self.repr(), r.repr()),
         }
     }
     pub fn more(&self, r: &Self) -> Value {
         match (self, r) {
-            (Value::Integer(a), Value::Integer(b)) => Value::Boolean(a < b),
-            (Value::Float(a), Value::Float(b)) => Value::Boolean(a < b),
-            _ => panic!("unable to {:?} > {:?}", self.repr(), r.repr())
+            (Value::Integer(a), Value::Integer(b)) => Value::Bool(a < b),
+            (Value::Float(a), Value::Float(b)) => Value::Bool(a < b),
+            _ => panic!("unable to {:?} > {:?}", self.repr(), r.repr()),
         }
     }
     pub fn less(&self, r: &Self) -> Value {
         match (self, r) {
-            (Value::Integer(a), Value::Integer(b)) => Value::Boolean(a < b),
-            (Value::Float(a), Value::Float(b)) => Value::Boolean(a < b),
-            _ => panic!("unable to {:?} < {:?}", self.repr(), r.repr())
+            (Value::Integer(a), Value::Integer(b)) => Value::Bool(a < b),
+            (Value::Float(a), Value::Float(b)) => Value::Bool(a < b),
+            _ => panic!("unable to {:?} < {:?}", self.repr(), r.repr()),
         }
     }
     pub fn eq(&self, r: &Self) -> Value {
         match (self, r) {
-            (Value::Integer(a), Value::Integer(b)) => Value::Boolean(a == b),
-            (Value::Float(a), Value::Float(b)) => Value::Boolean(a == b),
-            (Value::Boolean(a), Value::Boolean(b)) => Value::Boolean(a == b),
-            (Value::String(a), Value::String(b)) => Value::Boolean(a == b),
-            _ => panic!("unable to {:?} == {:?}", self.repr(), r.repr())
+            (Value::Integer(a), Value::Integer(b)) => Value::Bool(a == b),
+            (Value::Float(a), Value::Float(b)) => Value::Bool(a == b),
+            (Value::Bool(a), Value::Bool(b)) => Value::Bool(a == b),
+            (Value::String(a), Value::String(b)) => Value::Bool(a == b),
+            _ => panic!("unable to {:?} == {:?}", self.repr(), r.repr()),
         }
     }
 }

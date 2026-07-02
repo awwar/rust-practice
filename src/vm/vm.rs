@@ -1,6 +1,4 @@
-use crate::program::{Operation, Program, Value};
-use crate::vm::operation::{get_op_executable};
-use std::collections::BTreeMap;
+use crate::vm::{get_op_executable, Operation, Program, Value};
 use std::time::Duration;
 use std::{env, thread};
 
@@ -21,7 +19,7 @@ impl Stack {
     }
 }
 
-pub type Memo = BTreeMap<String, Value>;
+pub type Memo = Vec<Value>;
 
 pub struct VM {
     debug: bool,
@@ -29,30 +27,29 @@ pub struct VM {
 
 impl VM {
     pub fn new() -> VM {
-        let debug = env::var("DEBUG").unwrap_or_else(|_e| "0".to_string());
-
         VM {
-            debug: debug.eq("1") || debug.eq("true")
+            debug: env::var("DEBUG")
+                .unwrap_or_else(|_e| "0".to_string())
+                .eq("1"),
         }
     }
     pub fn execute(&self, pr: &mut Program) {
         let stack = &mut Stack::new();
-        let memo = &mut Memo::new();
+        let memo = &mut Memo::with_capacity(pr.get_memo_size());
+        memo.resize(pr.get_memo_size(), Value::Null);
 
         pr.jump_to_program_begin();
 
         loop {
-            pr.next();
-
-            if let Some(op) = pr.current() {
-                self.debug(op, stack);
-
-                get_op_executable(op.name)(pr, stack, memo);
-
-                continue;
+            if !pr.next() {
+                break;
             }
 
-            break;
+            let op = pr.current();
+
+            self.debug(op, stack);
+
+            get_op_executable(&op.name)(pr, stack, memo);
         }
     }
 
@@ -61,7 +58,7 @@ impl VM {
             return;
         }
 
-        thread::sleep(Duration::from_millis(500));
-        println!("> {} {}", op.to_string(), stack.len());
+        thread::sleep(Duration::from_millis(200));
+        println!("> {} {}", op, stack.len());
     }
 }
